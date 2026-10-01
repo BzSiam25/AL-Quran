@@ -1,0 +1,682 @@
+<title>Al Quran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Hind+Siliguri:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<<style>
+/* Layout: top nav; home = mint hero + 3-column surah grid; reader = one centred column; ask panel slides in from the right. Single light look. */
+:root{
+  color-scheme:light;
+  --bg:#ffffff; --surface:#f5f8f6; --ink:#15201b; --muted:#7a8580; --line:#e6ebe8;
+  --mint:#dcece3; --mint-2:#c2dccf; --mint-3:#a9cdbb; --green:#2e9266; --green-dark:#1d6b49; --on-green:#ffffff;
+  --hl-green:#dcf0e4; --hl-gold:#f7edcc; --hl-rose:#f8e0e0; --hl-blue:#dde9f6;
+  --f-ar:"Amiri Quran","Amiri","Scheherazade New","Traditional Arabic",serif;
+  --f-bn:"Hind Siliguri","Noto Sans Bengali","Vrinda",sans-serif;
+  --f-ui:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;
+  --ar-size:25px;
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.55}
+*{box-sizing:border-box}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px)}
+.nav .wrap{display:flex;align-items:center;gap:8px;height:54px}
+.logo{border:0;background:none;padding:0;font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--green-dark);margin-right:auto;display:flex;align-items:baseline;gap:6px}
+.logo small{font-family:var(--f-ar);font-weight:400;font-size:15px;color:var(--green)}
+.nlink{border:0;background:none;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:500;color:var(--muted)}
+.nlink:hover{color:var(--ink)}
+.nlink[aria-current="page"]{color:var(--ink);background:var(--surface)}
+.count{font-size:10px;background:var(--green);color:var(--on-green);border-radius:999px;padding:0 6px;margin-left:4px;line-height:16px;display:inline-block}
+.pill{border:1px solid var(--ink);background:none;border-radius:999px;padding:5px 14px;font-size:13px;font-weight:500}
+.pill:hover{background:var(--ink);color:var(--bg)}
+.ai-only{display:none!important}
+.ai-on .ai-only{display:inline-flex!important}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(135deg,var(--mint),var(--mint-2));padding:36px 36px 28px;margin-top:8px}
+.hero h1{font-size:clamp(24px,3.8vw,42px);line-height:1.1;letter-spacing:-.025em;font-weight:600;margin:0;max-width:13em;text-wrap:balance;position:relative}
+.hero .sub{margin:10px 0 0;font-family:var(--f-bn);font-size:15px;color:#3e5a4c;max-width:30em;position:relative}
+.mosque{position:absolute;right:-10px;bottom:0;width:min(400px,45%);height:auto;pointer-events:none}
+.hero-row{position:relative;display:flex;gap:18px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-top:24px}
+.cont{background:var(--bg);border-radius:14px;padding:12px 14px;width:min(280px,100%);box-shadow:0 6px 20px rgba(30,70,50,.08)}
+.cont small{display:block;font-size:11px;color:var(--muted)}
+.cont b{display:block;font-size:14px;margin-top:2px}
+.bar-track{height:4px;background:var(--line);border-radius:4px;margin:10px 0 6px;overflow:hidden}
+.bar-fill{height:100%;background:var(--green);border-radius:4px}
+.cont-foot{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.go{border:0;background:var(--ink);color:var(--bg);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500}
+.chips{display:flex;gap:6px;flex-wrap:wrap;max-width:480px}
+.chip-q{border:1px solid color-mix(in srgb,var(--ink) 35%,transparent);background:rgba(255,255,255,.35);border-radius:999px;padding:5px 12px;font-size:12px}
+.chip-q:hover{background:var(--bg)}
+
+/* surah grid */
+.sec{padding-block:36px 48px}
+.sec h2{font-size:clamp(22px,3vw,32px);letter-spacing:-.02em;line-height:1.15;font-weight:600;margin:0 0 20px;max-width:14em;text-wrap:balance}
+.tools-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.tabs{display:flex;gap:4px}
+.tab{border:0;background:none;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:500;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--green);color:var(--on-green)}
+.tools-row .sp{flex:1}
+.search{position:relative;width:min(280px,100%)}
+.search input{width:100%;padding:7px 12px 7px 32px;border:1px solid var(--line);border-radius:999px;background:var(--bg);font-size:13px}
+.search input:focus{border-color:var(--green);outline:none}
+.search svg{position:absolute;left:10px;top:50%;width:14px;height:14px;transform:translateY(-50%);stroke:var(--muted);fill:none;stroke-width:2}
+.sort{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:6px 0 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.sort button{border:0;background:none;color:var(--ink);font-weight:600;padding:0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px}
+.card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;border:0;background:none;
+  padding:10px 12px;border-radius:10px;border-bottom:1px solid var(--line);transition:background .15s,color .15s}
+.card:hover{background:var(--surface)}
+.card.on{background:var(--green);color:var(--on-green);border-bottom-color:transparent;box-shadow:0 8px 18px rgba(46,146,102,.2)}
+.card .no{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:22px}
+.card .nm{min-width:0}
+.card .nm b{display:block;font-weight:600;font-size:14px;line-height:1.25}
+.card .nm small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .rt{text-align:right}
+.card .rt .ar{display:block;font-family:var(--f-ar);font-size:18px;line-height:1.25}
+.card .rt small{font-size:11px;color:var(--muted)}
+.card.on .no,.card.on small{color:color-mix(in srgb,var(--on-green) 78%,transparent)}
+.empty{padding:30px 0;color:var(--muted);font-size:14px;line-height:1.6;grid-column:1/-1}
+.note-card{display:grid;gap:4px;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:12px;min-width:0}
+.note-card:hover{border-color:var(--mint-3)}
+.note-card .ref{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.note-card .txt{font-family:var(--f-bn);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.note-card .txt.dim{color:var(--muted)}
+.cdot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.cdot[data-c="green"]{background:#3e9a72}.cdot[data-c="gold"]{background:#c99a37}.cdot[data-c="rose"]{background:#c96f6f}.cdot[data-c="blue"]{background:#5089c2}
+.notes-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 16px;margin-top:14px}
+.sync{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted)}.dot.on{background:var(--green)}
+
+/* reader */
+.rbar{position:sticky;top:calc(54px + env(safe-area-inset-top,0px));z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.rbar .wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding-block:6px}
+.back{border:0;background:none;font-weight:600;font-size:13px;padding:4px 8px 4px 0;color:var(--green-dark)}
+.tg{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--muted)}
+.tg[aria-pressed="true"]{background:var(--mint);border-color:var(--mint-2);color:var(--green-dark);font-weight:600}
+.rbar .sp{flex:1}
+.ctl{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.ctl input[type=range]{width:72px;accent-color:var(--green)}
+.ctl input[type=number]{width:52px;padding:3px 6px;border:1px solid var(--line);border-radius:999px;background:var(--bg);text-align:center;font-size:12px}
+.page{max-width:740px;margin:0 auto;padding:18px 18px 60px}
+.head{position:relative;overflow:hidden;text-align:center;border-radius:18px;background:linear-gradient(135deg,var(--mint),var(--mint-2));padding:26px 16px 22px;margin-bottom:10px}
+.head .ar{font-family:var(--f-ar);font-size:36px;color:var(--green-dark);line-height:1.4}
+.head h2{font-size:22px;letter-spacing:-.015em;font-weight:600;margin:2px 0 0}
+.head .tr{color:#3e5a4c;font-size:14px}
+.meta{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.meta span{background:rgba(255,255,255,.55);border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:500;color:var(--green-dark)}
+.bism{font-family:var(--f-ar);font-size:calc(var(--ar-size) * 1.05);text-align:center;color:var(--green-dark);padding-block:14px 8px}
+.ayah{padding:18px 0;display:grid;gap:10px;scroll-margin-top:120px;border-top:1px solid var(--line)}
+.ayah[data-c]{border-top-color:transparent;padding-inline:16px;margin-inline:-16px;border-radius:14px;margin-block:3px}
+.ayah[data-c="green"]{background:var(--hl-green)}.ayah[data-c="gold"]{background:var(--hl-gold)}
+.ayah[data-c="rose"]{background:var(--hl-rose)}.ayah[data-c="blue"]{background:var(--hl-blue)}
+.ayah[data-c] + .ayah{border-top-color:transparent}
+.ayah.flash{animation:fl 1.6s ease}
+@keyframes fl{0%{background:var(--mint)}}
+.a-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.ref{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 8px;border-radius:999px;background:var(--mint);color:var(--green-dark);font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.tools{display:flex;gap:2px;opacity:.55;transition:opacity .2s}
+.ayah:hover .tools,.ayah:focus-within .tools{opacity:1}
+.tools button{border:0;background:none;color:var(--muted);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;padding:0}
+.tools button:hover,.tools button[aria-expanded="true"]{background:var(--mint);color:var(--green-dark)}
+.tools button.has{color:var(--green)}
+.ai-on .tools .ai-only{display:grid!important}
+.tl-lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tools svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.palette{display:flex;gap:8px;align-items:center;padding:6px 10px;background:var(--bg);border:1px solid var(--line);border-radius:999px;width:max-content;max-width:100%;flex-wrap:wrap;margin-left:auto}
+.sw{width:18px;height:18px;border-radius:50%;border:0;box-shadow:0 0 0 2px var(--bg),0 0 0 3px transparent}
+.sw[data-c="green"]{background:#3e9a72}.sw[data-c="gold"]{background:#c99a37}.sw[data-c="rose"]{background:#c96f6f}.sw[data-c="blue"]{background:#5089c2}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--ink)}
+.sw-clear{border:0;background:none;font-size:11.5px;color:var(--muted);padding:2px 4px}
+.ar-text{font-family:var(--f-ar);font-size:var(--ar-size);line-height:2.0;direction:rtl;text-align:right}
+.end{font-family:var(--f-ar);color:var(--green);font-size:.8em;margin-inline:.15em;white-space:nowrap}
+.tl{color:var(--green-dark);font-style:italic;font-size:14px}
+.bn{font-family:var(--f-bn);font-size:16px;line-height:1.75}
+.en{font-size:14.5px;line-height:1.6;color:var(--muted)}
+.hide-tl .tl,.hide-bn .bn,.hide-en .en,.hide-ar .ar-text{display:none}
+.note-view{border-left:3px solid var(--green);padding:2px 0 2px 12px;font-family:var(--f-bn);font-size:14px;white-space:pre-wrap}
+.note-view::before{content:"My note";display:block;font-family:var(--f-ui);font-size:11px;color:var(--green);font-weight:600}
+.note-edit{display:grid;gap:6px}
+.note-edit textarea{width:100%;min-height:80px;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-family:var(--f-bn);line-height:1.5}
+.note-edit textarea:focus{border-color:var(--green);outline:none}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 14px;font-size:12.5px}
+.btn.pri{background:var(--green);border-color:var(--green);color:var(--on-green);font-weight:600}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted);padding-inline:8px}
+.btn.ghost:hover{color:var(--ink)}
+.explain{background:var(--surface);border-radius:14px;padding:14px 16px;display:grid;gap:6px}
+.explain-h{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;color:var(--green-dark);font-weight:600}
+.md{font-family:var(--f-bn);font-size:14.5px;line-height:1.7}
+.md p{margin:0 0 .5em}.md p:last-child{margin-bottom:0}
+.md ul,.md ol{margin:0 0 .5em;padding-left:1.2em}
+.md h4{margin:.5em 0 .2em;font-size:14.5px;color:var(--green-dark)}
+.md strong{color:var(--green-dark)}
+.thinking{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:6px}
+.thinking::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--green);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{color:#b4533f;font-size:12.5px}
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:28px;flex-wrap:wrap}
+.pager button{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:12px 16px;text-align:left;min-width:0;flex:1 1 180px;font-weight:600;font-size:13.5px}
+.pager button:hover{border-color:var(--green)}
+.pager button:last-child{text-align:right}
+.pager small{display:block;color:var(--muted);font-size:11.5px;font-weight:500}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+.foot{color:var(--muted);font-size:11.5px;text-align:center;margin-top:28px;line-height:1.6}
+
+/* ask panel */
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);background:var(--bg);border-left:1px solid var(--line);z-index:40;
+  transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:-12px 0 32px rgba(20,50,35,.10)}
+.panel.open{transform:none}
+.p-head{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.p-head h3{margin:0;font-size:15px;font-weight:600;flex:1}
+.lang{display:flex;background:var(--surface);border-radius:999px;padding:2px}
+.lang button{border:0;background:none;padding:2px 8px;font-size:11.5px;border-radius:999px;color:var(--muted)}
+.lang button[aria-pressed="true"]{background:var(--bg);color:var(--green-dark);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.x{border:0;background:none;font-size:20px;line-height:1;color:var(--muted);padding:2px 5px}
+.chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.msg{max-width:92%;min-width:0}
+.msg.u{align-self:flex-end;background:var(--green);color:var(--on-green);padding:8px 12px;border-radius:16px 16px 4px 16px;white-space:pre-wrap;font-family:var(--f-bn);font-size:14px}
+.msg.a{align-self:flex-start;background:var(--surface);padding:10px 13px;border-radius:16px 16px 16px 4px;font-size:14px}
+.ctx-tag{font-size:11px;opacity:.85;display:block;margin-bottom:2px}
+.sugs{display:grid;gap:6px}
+.sugs p{margin:0 0 4px;color:var(--muted);font-size:13px;font-family:var(--f-bn)}
+.sug{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:8px 12px;text-align:left;font-size:13px;font-family:var(--f-bn)}
+.sug:hover{border-color:var(--green)}
+.composer{border-top:1px solid var(--line);padding:10px 14px;display:grid;gap:6px}
+.ctx{display:flex;align-items:center;gap:5px;font-size:11.5px;background:var(--mint);color:var(--green-dark);border-radius:999px;padding:3px 6px 3px 10px;width:max-content;max-width:100%}
+.ctx button{border:0;background:none;color:var(--green-dark);font-size:14px;line-height:1;padding:0 2px}
+.c-row{display:flex;gap:6px;align-items:flex-end}
+.c-row textarea{flex:1;min-width:0;resize:none;min-height:38px;max-height:120px;padding:8px 12px;border:1px solid var(--line);border-radius:18px;background:var(--surface);line-height:1.4;font-family:var(--f-bn);font-size:13.5px}
+.c-row textarea:focus{border-color:var(--green);outline:none}
+.c-row .btn{height:38px}
+.unavail{padding:20px 14px;color:var(--muted);font-size:13px;line-height:1.6}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:6px 14px;border-radius:999px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+
+@media (max-width:960px){ .grid,.notes-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){
+  .wrap{padding-inline:14px}
+  .nav .wrap{gap:2px}
+  .nlink{padding:6px 6px;font-size:12px}
+  .nlink.hide-sm{display:none}
+  .pill{padding:5px 10px;font-size:12px}
+  .hero{padding:24px 18px 20px;border-radius:16px}
+  .mosque{width:80%;opacity:.55}
+  .grid,.notes-grid{grid-template-columns:minmax(0,1fr)}
+  .sec{padding-block:28px 40px}
+  .page{padding-inline:14px}
+  .ayah[data-c]{padding-inline:12px;margin-inline:-12px}
+  .tools{opacity:1}
+  .head .ar{font-size:32px}.head h2{font-size:20px}
+  .ctl .lbl-t{display:none}
+}
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <button class="logo" id="logo">Al Quran <small>القرآن</small></button>
+    <button class="nlink" data-nav="surah" aria-current="page">Surah</button>
+    <button class="nlink hide-sm" data-nav="juz">Juz</button>
+    <button class="nlink" data-nav="notes">My Notes<span class="count" id="ncount" hidden>0</span></button>
+    <button class="pill ai-only" id="openask">Ask</button>
+  </div>
+</header>
+
+<main id="home">
+  <div class="wrap">
+    <section class="hero">
+      <svg class="mosque" viewBox="0 0 520 300" aria-hidden="true">
+        <g fill="#ffffff" opacity=".45">
+          <rect x="60" y="40" width="16" height="260" rx="3"/><path d="M58 44 L68 10 L78 44 Z"/><rect x="54" y="90" width="28" height="8" rx="2"/>
+          <rect x="452" y="70" width="14" height="230" rx="3"/><path d="M450 74 L459 44 L468 74 Z"/><rect x="446" y="120" width="26" height="7" rx="2"/>
+          <path d="M150 300 V190 C150 120 210 92 260 70 C310 92 370 120 370 190 V300 Z"/>
+          <rect x="255" y="40" width="10" height="34" rx="2"/><circle cx="260" cy="36" r="7"/>
+          <path d="M100 300 V230 C100 200 125 186 140 178 C155 186 180 200 180 230 V300 Z"/>
+          <path d="M340 300 V230 C340 200 365 186 380 178 C395 186 420 200 420 230 V300 Z"/>
+        </g>
+        <g fill="#ffffff" opacity=".7">
+          <path d="M236 300 V250 C236 232 248 224 260 220 C272 224 284 232 284 250 V300 Z"/>
+          <rect x="196" y="236" width="16" height="30" rx="8"/><rect x="308" y="236" width="16" height="30" rx="8"/>
+        </g>
+      </svg>
+      <h1>Read, reflect &amp; understand the Quran.</h1>
+      <p class="sub">আরবি পাঠের সাথে বাংলা ও ইংরেজি অনুবাদ, আয়াতের ব্যাখ্যা আর আপনার নিজের নোট, সব এক জায়গায়।</p>
+      <div class="hero-row">
+        <div class="cont" id="cont"></div>
+        <div class="chips">
+          <button class="chip-q" data-open="18">Al-Kahf</button>
+          <button class="chip-q" data-open="36">Ya-Sin</button>
+          <button class="chip-q" data-open="55">Ar-Rahman</button>
+          <button class="chip-q" data-open="56">Al-Waqi'ah</button>
+          <button class="chip-q" data-open="67">Al-Mulk</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="browse">
+      <h2 id="sec-title">Let’s start the journey of the Quran</h2>
+      <div class="tools-row">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" data-tab="surah" aria-selected="true">Surah</button>
+          <button class="tab" role="tab" data-tab="juz" aria-selected="false">Juz</button>
+          <button class="tab" role="tab" data-tab="notes" aria-selected="false">My Notes</button>
+        </div>
+        <span class="sp"></span>
+        <label class="search" id="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="Search surah · সূরা খুঁজুন" aria-label="Search surah"></label>
+      </div>
+      <div class="sort" id="sortrow"><span>Sort by: <button id="sort">Ascending</button></span><span class="sync"><span class="dot" id="syncdot"></span><span id="synctext">Notes saved in this browser</span></span></div>
+      <div id="listing"></div>
+    </section>
+  </div>
+</main>
+
+<main id="reader" hidden>
+  <div class="rbar">
+    <div class="wrap">
+      <button class="back" id="back">← All surahs</button>
+      <button class="tg" data-t="ar" aria-pressed="true">Arabic</button>
+      <button class="tg" data-t="bn" aria-pressed="true">Bangla</button>
+      <button class="tg" data-t="en" aria-pressed="true">English</button>
+      <button class="tg" data-t="tl" aria-pressed="false">Transliteration</button>
+      <span class="sp"></span>
+      <label class="ctl" for="jump"><span class="lbl-t">Ayah</span><input id="jump" type="number" min="1" inputmode="numeric" placeholder="#"></label>
+      <label class="ctl" for="fs"><span>Aa</span><input id="fs" type="range" min="18" max="40" step="2" value="25"></label>
+    </div>
+  </div>
+  <div class="page" id="page"></div>
+</main>
+
+<aside class="panel" id="panel" aria-label="Ask a question">
+  <div class="p-head">
+    <h3>Ask a question</h3>
+    <div class="lang" id="lang"><button data-l="bn" aria-pressed="true">বাংলা</button><button data-l="en" aria-pressed="false">EN</button></div>
+    <button class="x" id="closeask" aria-label="Close">×</button>
+  </div>
+  <div class="chat" id="chat"></div>
+  <div class="composer">
+    <div class="ctx" id="ctx" hidden><span id="ctxlabel"></span><button id="ctxclear" aria-label="Remove context">×</button></div>
+    <div class="c-row">
+      <textarea id="askbox" rows="1" placeholder="কুরআন সম্পর্কে যেকোনো প্রশ্ন লিখুন…"></textarea>
+      <button class="btn pri" id="send">Send</button>
+    </div>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const S = __INDEX__;
+const JUZ = [[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
+const $ = s => document.querySelector(s);
+const store = {get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+               set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const arNum = n => String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const pad = n => String(n).padStart(2,'0');
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COLORS = ['green','gold','rose','blue'];
+const ICON = {
+  hl:'<svg viewBox="0 0 24 24"><path d="M9 11l-4 4v4h4l4-4"/><path d="M13 7l4 4"/><path d="M15 5l4 4-6 6-4-4z"/></svg>',
+  note:'<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>',
+  ex:'<svg viewBox="0 0 24 24"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4z"/><path d="M20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg>',
+  ask:'<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>',
+  copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>'
+};
+const cache = {};
+let cur = 0, tab = 'surah', asc = true;
+
+/* ---------- marks: highlights + notes ---------- */
+let marks = store.get('marks', {});
+let col = null; const chains = {};
+function saveLocal(){ store.set('marks', marks); }
+function setMark(key, patch){
+  const m = Object.assign({}, marks[key] || {}, patch, {t: Date.now()});
+  if (!m.c) delete m.c; if (!m.n) delete m.n;
+  const empty = !m.c && !m.n;
+  if (empty) delete marks[key]; else marks[key] = m;
+  saveLocal(); paintAyah(key); updateCount(); if (tab === 'notes' && !$('#home').hidden) renderListing();
+  if (col) {
+    const ref = col.doc(key);
+    chains[key] = (chains[key] || Promise.resolve()).then(() => empty ? ref.delete() : ref.set(m))
+      .catch(e => toast(e && e.code === 'quota_exceeded' ? 'Storage full. Delete some notes.' : 'Not synced. Saved in this browser.'));
+  }
+}
+async function startSync(){
+  if (!window.claude || !claude.use) return;
+  try {
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db || !user) return;
+    const uid = await user.id(); if (!uid) return;
+    col = db.collection('data/users/' + uid);
+    let first = true;
+    col.onSnapshot(snap => {
+      const remote = {};
+      snap.docs.forEach(d => { if (d.exists) remote[d.id] = d.data(); });
+      if (first) { first = false; Object.keys(marks).forEach(k => { if (!remote[k]) { remote[k] = marks[k]; col.doc(k).set(marks[k]).catch(()=>{}); } }); }
+      marks = remote; saveLocal();
+      document.querySelectorAll('.ayah').forEach(el => paintAyah(el.dataset.k));
+      updateCount(); if (tab === 'notes' && !$('#home').hidden) renderListing();
+      $('#syncdot').classList.add('on'); $('#synctext').textContent = 'Notes synced to your account';
+    }, () => { col = null; $('#syncdot').classList.remove('on'); $('#synctext').textContent = 'Notes saved in this browser'; });
+  } catch (e) {}
+}
+function updateCount(){ const n = Object.keys(marks).length; const c = $('#ncount'); c.hidden = !n; c.textContent = n; }
+
+/* ---------- AI ---------- */
+let sample = null;
+const prefs = Object.assign({ar:true, tl:false, bn:true, en:true, fs:25, lang:'bn'}, store.get('prefs', {}));
+(async () => {
+  if (!window.claude || !claude.use) return;
+  try { sample = await claude.use('sample'); } catch(e) { sample = null; }
+  if (sample) document.body.classList.add('ai-on');
+})();
+function aiError(e){
+  const c = e && e.code;
+  if (['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)) { document.body.classList.remove('ai-on'); return 'এই ফিচার ব্যবহারের অনুমতি দেওয়া হয়নি।'; }
+  if (c === 'rate_limited') return 'অনেক বেশি অনুরোধ হয়েছে। একটু পরে আবার চেষ্টা করুন।';
+  if (c === 'session_expired') return 'আবার সাইন ইন করে চেষ্টা করুন।';
+  if (c === 'refused') return 'এই প্রশ্নের উত্তর দেওয়া যায়নি। অন্যভাবে জিজ্ঞেস করে দেখুন।';
+  return 'উত্তর আনতে সমস্যা হয়েছে। আবার চেষ্টা করুন।';
+}
+const LNAME = () => prefs.lang === 'en' ? 'English' : 'Bangla (বাংলা)';
+function ayahBlock(n, i){ const a = cache[n][i], s = S[n-1]; return `Surah ${s[2]} (${s[1]}), ${n}:${i+1}\nArabic: ${a[0]}\nBangla translation: ${a[1]}\nEnglish translation: ${a[2]}`; }
+function md(src){
+  const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/(^|[^*])\*(?!\s)(.+?)\*/g,'$1<em>$2</em>');
+  const out = []; let list = null;
+  for (const raw of String(src).split('\n')) {
+    const line = raw.trimEnd(); let m;
+    if ((m = line.match(/^\s*[-*•]\s+(.*)/)) || (m = line.match(/^\s*\d+[.)]\s+(.*)/))) {
+      const type = /^\s*\d/.test(line) ? 'ol' : 'ul';
+      if (!list || list.type !== type) { if (list) out.push(`</${list.type}>`); list = {type}; out.push(`<${type}>`); }
+      out.push(`<li>${inline(m[1])}</li>`); continue;
+    }
+    if (list) { out.push(`</${list.type}>`); list = null; }
+    if (!line.trim()) continue;
+    if ((m = line.match(/^#{1,6}\s+(.*)/))) out.push(`<h4>${inline(m[1])}</h4>`); else out.push(`<p>${inline(line)}</p>`);
+  }
+  if (list) out.push(`</${list.type}>`);
+  return out.join('');
+}
+
+/* ---------- home ---------- */
+function renderCont(){
+  const pos = store.get('pos', null), n = pos ? pos.n : 1, a = pos ? pos.a : 1, s = S[n-1];
+  const pct = Math.round(a / s[6] * 100);
+  $('#cont').innerHTML = `<small>${pos ? 'Continue reading' : 'Start reading'}</small><b>Surah ${esc(s[2])} (${esc(s[3])})</b>
+    <div class="bar-track"><div class="bar-fill" style="width:${pos ? Math.max(3,pct) : 0}%"></div></div>
+    <div class="cont-foot"><span>Ayah ${a} of ${s[6]}</span><button class="go" data-open="${n}" data-ayah="${a}">Open</button></div>`;
+}
+function surahCard(s){
+  return `<button class="card${s[0]===cur?' on':''}" data-open="${s[0]}">
+    <span class="no">${pad(s[0])}.</span>
+    <span class="nm"><b>${esc(s[2])}</b><small>${esc(s[3])} · ${esc(s[4])}</small></span>
+    <span class="rt"><span class="ar">${s[1]}</span><small>${s[6]} verses</small></span></button>`;
+}
+function renderListing(){
+  const L = $('#listing');
+  $('#searchbox').hidden = tab !== 'surah'; $('#sortrow').hidden = tab === 'notes';
+  document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
+  document.querySelectorAll('.nlink').forEach(b => b.setAttribute('aria-current', !$('#home').hidden && b.dataset.nav === tab ? 'page' : 'false'));
+  $('#sec-title').textContent = tab === 'notes' ? 'Your highlights & notes' : tab === 'juz' ? 'Read by Juz' : 'Let’s start the journey of the Quran';
+  if (tab === 'surah') {
+    const f = $('#q').value.trim().toLowerCase(), raw = $('#q').value.trim();
+    let list = S.filter(s => !f || String(s[0])===f || s[2].toLowerCase().includes(f) || s[3].toLowerCase().includes(f) || s[4].includes(raw) || s[1].includes(raw));
+    if (!asc) list = list.slice().reverse();
+    L.innerHTML = `<div class="grid">${list.map(surahCard).join('') || '<p class="empty">No surah matches your search.</p>'}</div>`;
+  } else if (tab === 'juz') {
+    let js = JUZ.map((j,i) => [i+1, j]); if (!asc) js.reverse();
+    L.innerHTML = `<div class="grid">${js.map(([no,[n,a]]) => { const s = S[n-1]; return `<button class="card" data-open="${n}" data-ayah="${a}">
+      <span class="no">${pad(no)}.</span><span class="nm"><b>Juz ${no}</b><small>Starts at ${esc(s[2])} ${n}:${a}</small></span>
+      <span class="rt"><span class="ar">الجزء ${arNum(no)}</span></span></button>`; }).join('')}</div>`;
+  } else renderNotes();
+}
+async function renderNotes(){
+  const keys = Object.keys(marks).sort((x,y)=>{const [a,b]=x.split(':').map(Number),[c,d]=y.split(':').map(Number);return a-c||b-d});
+  if (!keys.length) { $('#listing').innerHTML = '<p class="empty">Nothing saved yet. Open a surah and use the <b>Highlight</b> or <b>Note</b> icon next to any ayah. It will appear here.</p>'; return; }
+  $('#listing').innerHTML = `<div class="notes-grid">${keys.map(k => {
+    const [n, a] = k.split(':').map(Number), m = marks[k];
+    const text = m.n ? esc(m.n) : (cache[n] ? esc(cache[n][a-1][1]) : 'Highlighted ayah');
+    return `<button class="note-card" data-open="${n}" data-ayah="${a}"><span class="ref"><span class="cdot" ${m.c?`data-c="${m.c}"`:''}></span>${esc(S[n-1][2])} ${n}:${a}${m.n?' · Note':''}</span><span class="txt${m.n?'':' dim'}">${text}</span></button>`;
+  }).join('')}</div>`;
+  const need = [...new Set(keys.filter(k => !marks[k].n).map(k => +k.split(':')[0]).filter(n => !cache[n]))].slice(0, 6);
+  if (need.length) { await Promise.all(need.map(n => load(n).catch(()=>{}))); if (tab === 'notes' && !$('#home').hidden) renderNotes(); }
+}
+function showHome(t){
+  if (t) tab = t;
+  $('#reader').hidden = true; $('#home').hidden = false;
+  renderCont(); renderListing();
+}
+document.addEventListener('click', e => {
+  const o = e.target.closest('[data-open]');
+  if (o) { openSurah(+o.dataset.open, o.dataset.ayah ? +o.dataset.ayah : 0); return; }
+  const nv = e.target.closest('[data-nav]');
+  if (nv) { showHome(nv.dataset.nav); $('#browse').scrollIntoView(); return; }
+  const tb = e.target.closest('.tab');
+  if (tb) { tab = tb.dataset.tab; renderListing(); }
+});
+$('#logo').onclick = () => { showHome('surah'); window.scrollTo(0,0); };
+$('#back').onclick = () => { showHome(); $('#browse').scrollIntoView(); };
+$('#q').addEventListener('input', renderListing);
+$('#sort').onclick = () => { asc = !asc; $('#sort').textContent = asc ? 'Ascending' : 'Descending'; renderListing(); };
+
+/* ---------- prefs ---------- */
+function applyPrefs(){
+  const p = $('#page');
+  ['ar','tl','bn','en'].forEach(k => { p.classList.toggle('hide-'+k, !prefs[k]); document.querySelector(`.tg[data-t="${k}"]`).setAttribute('aria-pressed', prefs[k]); });
+  document.documentElement.style.setProperty('--ar-size', prefs.fs+'px'); $('#fs').value = prefs.fs;
+  document.querySelectorAll('#lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === prefs.lang));
+}
+document.querySelectorAll('.tg[data-t]').forEach(c => c.addEventListener('click', () => { prefs[c.dataset.t] = !prefs[c.dataset.t]; store.set('prefs', prefs); applyPrefs(); }));
+$('#fs').addEventListener('input', e => { prefs.fs = +e.target.value; store.set('prefs', prefs); applyPrefs(); });
+document.querySelectorAll('#lang button').forEach(b => b.onclick = () => { prefs.lang = b.dataset.l; store.set('prefs', prefs); applyPrefs(); });
+
+/* ---------- reader ---------- */
+async function load(n){
+  if (cache[n]) return cache[n];
+  const r = await fetch(`data/${n}.json`); if (!r.ok) throw new Error(r.status);
+  return cache[n] = await r.json();
+}
+function ayahHTML(n, a, i){
+  const k = `${n}:${i+1}`;
+  return `<article class="ayah" id="a${i+1}" data-k="${k}">
+    <div class="a-top"><span class="ref">${n}:${i+1}</span>
+      <span class="tools">
+        <button data-act="hl" title="Highlight" aria-expanded="false">${ICON.hl}<span class="tl-lbl">Highlight</span></button>
+        <button data-act="note" title="Note">${ICON.note}<span class="tl-lbl">Note</span></button>
+        <button data-act="ex" title="Explain" class="ai-only">${ICON.ex}<span class="tl-lbl">Explain</span></button>
+        <button data-act="ask" title="Ask a question" class="ai-only">${ICON.ask}<span class="tl-lbl">Ask</span></button>
+        <button data-act="copy" title="Copy">${ICON.copy}<span class="tl-lbl">Copy</span></button>
+      </span></div>
+    <div class="slot-pal"></div>
+    <div class="ar-text" lang="ar">${a[0]} <span class="end">﴿${arNum(i+1)}﴾</span></div>
+    ${a[3] ? `<div class="tl">${esc(a[3])}</div>` : ''}
+    <div class="bn" lang="bn">${esc(a[1])}</div>
+    <div class="en" lang="en">${esc(a[2])}</div>
+    <div class="slot-note"></div>
+    <div class="slot-ex"></div>
+  </article>`;
+}
+function paintAyah(k){
+  const el = document.querySelector(`.ayah[data-k="${k}"]`); if (!el) return;
+  const m = marks[k] || {};
+  m.c ? el.setAttribute('data-c', m.c) : el.removeAttribute('data-c');
+  el.querySelectorAll('.sw').forEach(s => s.setAttribute('aria-pressed', s.dataset.c === m.c));
+  const slot = el.querySelector('.slot-note');
+  if (!slot.querySelector('.note-edit')) slot.innerHTML = m.n ? `<div class="note-view">${esc(m.n)}</div>` : '';
+  el.querySelector('[data-act="note"]').classList.toggle('has', !!m.n);
+}
+let io = null;
+async function openSurah(n, ayah){
+  n = Math.min(114, Math.max(1, n|0)); cur = n;
+  $('#home').hidden = true; $('#reader').hidden = false;
+  document.querySelectorAll('.nlink').forEach(b => b.setAttribute('aria-current','false'));
+  const s = S[n-1];
+  $('#page').innerHTML = '<div class="loading">Loading…</div>'; window.scrollTo(0,0);
+  let v;
+  try { v = await load(n); } catch(e){ $('#page').innerHTML = '<div class="loading">This surah could not load. Check your connection and try again.</div>'; return; }
+  if (cur !== n || $('#reader').hidden) return;
+  const bism = (n !== 1 && n !== 9) ? '<div class="bism">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>' : '';
+  const prev = S[n-2], next = S[n];
+  $('#page').innerHTML = `
+    <header class="head">
+      <div class="ar">سُورَةُ ${s[1]}</div>
+      <h2>${esc(s[2])}</h2>
+      <div class="tr">${esc(s[3])} · <span style="font-family:var(--f-bn)">${esc(s[4])}</span></div>
+      <div class="meta"><span>Surah ${n}</span><span>${s[5]==='meccan'?'Meccan':'Medinan'}</span><span>${s[6]} verses</span></div>
+    </header>
+    ${bism}
+    ${v.map((a,i) => ayahHTML(n, a, i)).join('')}
+    <nav class="pager">
+      ${prev ? `<button data-open="${n-1}"><small>← Previous</small>${prev[0]}. ${esc(prev[2])}</button>` : '<span></span>'}
+      ${next ? `<button data-open="${n+1}"><small>Next →</small>${next[0]}. ${esc(next[2])}</button>` : '<span></span>'}
+    </nav>
+    <p class="foot">Uthmani text &amp; translations via QuranEnc.com · Bangla: Muhiuddin Khan · English: Saheeh International · Transliteration: Tanzil.net<br>AI explanations are a study aid. For important matters, consult reliable tafsir and a qualified scholar.</p>`;
+  applyPrefs();
+  Object.keys(marks).forEach(k => { if (k.startsWith(n+':')) paintAyah(k); });
+  $('#jump').max = s[6]; $('#jump').value = '';
+  if (ayah) goAyah(ayah); else store.set('pos', {n, a: 1});
+  if (io) io.disconnect();
+  let tmr;
+  io = new IntersectionObserver(es => {
+    const vis = es.filter(x => x.isIntersecting).map(x => +x.target.id.slice(1));
+    if (!vis.length) return;
+    clearTimeout(tmr); tmr = setTimeout(() => store.set('pos', {n, a: Math.min(...vis)}), 600);
+  }, {rootMargin: '-140px 0px -60% 0px'});
+  document.querySelectorAll('.ayah').forEach(el => io.observe(el));
+}
+function goAyah(k){
+  const el = document.getElementById('a'+k); if (!el) return;
+  el.scrollIntoView({block:'start'}); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+$('#jump').addEventListener('change', e => goAyah(+e.target.value));
+
+const exCtl = {};
+$('#page').addEventListener('click', async e => {
+  const art = e.target.closest('.ayah'); if (!art) return;
+  const k = art.dataset.k, [n, a] = k.split(':').map(Number), i = a - 1;
+  const sw = e.target.closest('.sw');
+  if (sw) { setMark(k, {c: (marks[k]||{}).c === sw.dataset.c ? '' : sw.dataset.c}); return; }
+  if (e.target.closest('.sw-clear')) { setMark(k, {c: ''}); return; }
+  const act = e.target.closest('[data-act]'); const t = act && act.dataset.act;
+  if (t === 'hl') {
+    const slot = art.querySelector('.slot-pal'), open = !!slot.innerHTML;
+    slot.innerHTML = open ? '' : `<div class="palette" role="group" aria-label="Highlight colour">${COLORS.map(c=>`<button class="sw" data-c="${c}" aria-label="${c}" aria-pressed="${(marks[k]||{}).c===c}"></button>`).join('')}<button class="sw-clear">Remove</button></div>`;
+    act.setAttribute('aria-expanded', !open);
+  }
+  if (t === 'note') {
+    const slot = art.querySelector('.slot-note');
+    if (slot.querySelector('.note-edit')) return;
+    slot.innerHTML = `<div class="note-edit"><textarea id="note-${n}-${a}" placeholder="এই আয়াত নিয়ে আপনার ভাবনা, শিক্ষা বা মনে রাখার কথা লিখুন…">${esc((marks[k]||{}).n || '')}</textarea>
+      <div class="row"><button class="btn pri" data-note="save">Save</button><button class="btn ghost" data-note="cancel">Cancel</button>${(marks[k]||{}).n ? '<button class="btn ghost" data-note="del">Delete note</button>' : ''}</div></div>`;
+    slot.querySelector('textarea').focus();
+  }
+  const nb = e.target.closest('[data-note]');
+  if (nb) {
+    const slot = art.querySelector('.slot-note'), val = slot.querySelector('textarea').value.trim();
+    slot.innerHTML = '';
+    if (nb.dataset.note === 'save') { setMark(k, {n: val}); if (val) toast('Note saved'); }
+    else if (nb.dataset.note === 'del') { setMark(k, {n: ''}); toast('Note deleted'); }
+    else paintAyah(k);
+  }
+  if (t === 'ex' || e.target.closest('[data-ex="again"]')) explain(art, n, i, !!e.target.closest('[data-ex="again"]'));
+  if (e.target.closest('[data-ex="close"]')) { exCtl[k] && exCtl[k].abort(); art.querySelector('.slot-ex').innerHTML = ''; }
+  if (e.target.closest('[data-ex="stop"]')) exCtl[k] && exCtl[k].abort();
+  if (t === 'ask') { setContext(n, i); openPanel(); }
+  if (t === 'copy') {
+    const v = cache[n][i], s = S[n-1], parts = [v[0]];
+    if (prefs.bn) parts.push(v[1]); if (prefs.en) parts.push(v[2]); parts.push(`— ${s[2]} ${n}:${a}`);
+    try { await navigator.clipboard.writeText(parts.join('\n\n')); toast('Ayah copied'); }
+    catch(err){ const r = document.createRange(); r.selectNodeContents(art); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('Selected. Press Ctrl+C to copy'); }
+  }
+});
+async function explain(art, n, i, again){
+  if (!sample) return;
+  const k = `${n}:${i+1}`, slot = art.querySelector('.slot-ex');
+  exCtl[k] && exCtl[k].abort();
+  const ctl = exCtl[k] = new AbortController();
+  slot.innerHTML = `<div class="explain"><div class="explain-h"><span>Explanation · ${n}:${i+1}</span><span class="row"><button class="btn ghost" data-ex="stop">Stop</button><button class="btn ghost" data-ex="close">Close</button></span></div><div class="md"><div class="thinking">Writing explanation…</div></div></div>`;
+  const box = slot.querySelector('.md'), head = slot.querySelector('.explain-h .row');
+  const prompt = `You are helping a Muslim reader study the Quran in a personal reading app. Explain the verse below in ${LNAME()} for a thoughtful general reader.
+Use short bold headings for: background/context (mention the occasion of revelation only if it is well established), meaning of the verse, and key lessons for daily life. Where useful, draw on classical tafsir (for example Ibn Kathir, al-Tabari, al-Qurtubi) and name the source when you rely on it. Never invent hadith, narrations or references; if scholars differ, say so briefly. About 200–300 words, plain Markdown, no preamble.
+
+${ayahBlock(n, i)}`;
+  try {
+    const {truncated} = await sample(prompt, {signal: ctl.signal, onText: ({text}) => { box.innerHTML = md(text); }, cache: again ? {gcTime: 86400000, refresh: true} : {gcTime: 86400000}});
+    if (truncated) box.insertAdjacentHTML('beforeend', '<p class="err">উত্তর মাঝপথে থেমে গেছে।</p>');
+  } catch(err) {
+    if (err && err.code === 'cancelled') { if (!err.text) { slot.innerHTML = ''; return; } }
+    else box.innerHTML = (err && err.text ? md(err.text) : '') + `<p class="err">${aiError(err)}</p>`;
+  }
+  if (slot.querySelector('.explain')) head.innerHTML = '<button class="btn ghost" data-ex="again">Regenerate</button><button class="btn ghost" data-ex="close">Close</button>';
+}
+
+/* ---------- ask panel ---------- */
+let turns = [], ctx = null, askCtl = null;
+const RULES = () => `You are a knowledgeable, careful study companion inside a personal Quran reading app (Arabic text with Bangla and English translations). Reply in ${LNAME()} unless the user clearly writes in another language, then match them.
+Ground answers in the Quran (cite verses as Surah:Ayah) and well-known tafsir and authentic hadith collections; name sources when you rely on them and never invent verses, hadith or references. If scholars differ, say so briefly and fairly. For personal religious rulings give the general view and suggest consulting a qualified scholar. Be concise and clear: short paragraphs or bullet lists, plain Markdown.`;
+function openPanel(){ $('#panel').classList.add('open'); renderChat(); setTimeout(() => $('#askbox').focus(), 260); }
+$('#openask').onclick = () => { if (!ctx && cur && !$('#reader').hidden) setContext(cur, null); openPanel(); };
+$('#closeask').onclick = () => $('#panel').classList.remove('open');
+function setContext(n, i){ ctx = {n, i}; $('#ctx').hidden = false; $('#ctxlabel').textContent = i === null ? `Context: Surah ${S[n-1][2]}` : `Context: ${S[n-1][2]} ${n}:${i+1}`; }
+$('#ctxclear').onclick = () => { ctx = null; $('#ctx').hidden = true; };
+function renderChat(){
+  const c = $('#chat');
+  if (!sample) { c.innerHTML = '<p class="unavail">Questions and explanations work when this page is opened on claude.ai while signed in.</p>'; return; }
+  if (!turns.length) {
+    const s = cur ? S[cur-1] : null;
+    const sugs = [ s ? `সূরা ${s[2]}-এর মূল বিষয়বস্তু কী?` : 'সূরা আল-ফাতিহার মূল শিক্ষা কী?', 'কুরআনে ধৈর্য (সবর) সম্পর্কে কী বলা হয়েছে?', 'মাক্কী ও মাদানী সূরার পার্থক্য কী?' ];
+    c.innerHTML = `<div class="sugs"><p>কুরআন, কোনো আয়াত বা সূরা নিয়ে প্রশ্ন করুন। কোনো আয়াতের পাশের Ask আইকন চাপলে সেই আয়াত প্রসঙ্গ হিসেবে যুক্ত হয়।</p>${sugs.map(q=>`<button class="sug">${esc(q)}</button>`).join('')}</div>`;
+    return;
+  }
+  c.innerHTML = turns.map(t => t.role === 'user'
+    ? `<div class="msg u">${t.tag ? `<span class="ctx-tag">${esc(t.tag)}</span>` : ''}${esc(t.show)}</div>`
+    : `<div class="msg a md">${t.html || md(t.content)}</div>`).join('');
+  c.scrollTop = c.scrollHeight;
+}
+$('#chat').addEventListener('click', e => { const s = e.target.closest('.sug'); if (s) { $('#askbox').value = s.textContent; send(); } });
+async function send(){
+  if (askCtl) { askCtl.abort(); return; }
+  const q = $('#askbox').value.trim();
+  if (!q || !sample) return;
+  let content = q, tag = '';
+  if (ctx) {
+    if (ctx.i === null) { const s = S[ctx.n-1]; content = `[Context: the reader is reading Surah ${s[2]} (${s[1]}), surah ${ctx.n}, ${s[6]} verses]\n\n${q}`; tag = `Surah ${s[2]}`; }
+    else { try { await load(ctx.n); } catch(e){} if (cache[ctx.n]) { content = `[Context verse]\n${ayahBlock(ctx.n, ctx.i)}\n\nQuestion: ${q}`; tag = `${S[ctx.n-1][2]} ${ctx.n}:${ctx.i+1}`; } }
+    ctx = null; $('#ctx').hidden = true;
+  }
+  turns.push({role:'user', content, show:q, tag});
+  $('#askbox').value = ''; autoGrow();
+  const reply = {role:'assistant', content:'', html:'<div class="thinking">Thinking…</div>'};
+  turns.push(reply); renderChat();
+  const bubble = $('#chat').lastElementChild;
+  askCtl = new AbortController(); $('#send').textContent = 'Stop';
+  const history = turns.slice(0, -1).filter(t => t.content).slice(-12).map(t => ({role:t.role, content:t.content}));
+  try {
+    const {text} = await sample([{role:'user', content: RULES()}, ...history], {cache:false, signal:askCtl.signal,
+      onText: ({text}) => { reply.content = text; reply.html = null; bubble.innerHTML = md(text); $('#chat').scrollTop = $('#chat').scrollHeight; }});
+    reply.content = text; reply.html = null;
+  } catch(err) {
+    reply.content = err && err.text || '';
+    reply.html = (reply.content ? md(reply.content) : '') + (err && err.code === 'cancelled' ? '' : `<p class="err">${aiError(err)}</p>`);
+    if (!reply.content && err && err.code === 'cancelled') turns.pop();
+  }
+  askCtl = null; $('#send').textContent = 'Send'; renderChat();
+}
+$('#send').onclick = send;
+function autoGrow(){ const t = $('#askbox'); t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight) + 'px'; }
+$('#askbox').addEventListener('input', autoGrow);
+$('#askbox').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1800); }
+
+applyPrefs(); updateCount();
+const h = location.hash.match(/^#s(\d+)$/);
+if (h) openSurah(+h[1]); else showHome('surah');
+startSync();
+</script>
