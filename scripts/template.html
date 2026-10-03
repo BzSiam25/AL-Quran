@@ -368,20 +368,106 @@ async function startSync(){
 }
 function updateCount(){ const n = Object.keys(marks).length; const c = $('#ncount'); c.hidden = !n; c.textContent = n; }
 
-/* ---------- AI ---------- */
-let sample = null;
+/* ---------- AI (Gemini Integration with Fallback) ---------- */
+const GEMINI_API_KEY = 'AQ.Ab8RN6KTKukQIhMXURZuJ81A4_AK00SzQnkfLXaNmKnWlFlxbw';
+const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+
+async function sample(input, options = {}) {
+  const { signal, onText } = options;
+  let contents = [];
+  if (typeof input === 'string') {
+    contents = [{ role: 'user', parts: [{ text: input }] }];
+  } else if (Array.isArray(input)) {
+    contents = input.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+  }
+
+  let lastErrMsg = '';
+  for (const model of GEMINI_MODELS) {
+    if (signal && signal.aborted) break;
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents }),
+        signal
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        let errMsg = `Gemini API error (${response.status})`;
+        try {
+          const errObj = JSON.parse(errText);
+          if (errObj.error && errObj.error.message) errMsg = errObj.error.message;
+        } catch(e) {}
+        
+        lastErrMsg = errMsg;
+        // Fallback to next model if model is busy / high demand / unavailable
+        if (response.status === 429 || response.status === 503 || response.status === 404 || errMsg.includes('demand') || errMsg.includes('busy') || errMsg.includes('available')) {
+          continue;
+        }
+        throw { code: 'api_error', message: errMsg, text: '' };
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let fullText = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            const jsonStr = trimmed.slice(6);
+            if (jsonStr === '[DONE]') continue;
+            try {
+              const data = JSON.parse(jsonStr);
+              const candidates = data.candidates || [];
+              for (const cand of candidates) {
+                const parts = cand.content?.parts || [];
+                for (const part of parts) {
+                  if (part.text) {
+                    fullText += part.text;
+                    if (onText) onText({ text: fullText });
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      }
+
+      return { text: fullText, truncated: false };
+    } catch(err) {
+      if (err && (err.name === 'AbortError' || (signal && signal.aborted))) throw err;
+      if (err && err.code === 'api_error') throw err;
+      lastErrMsg = err && err.message ? err.message : String(err);
+    }
+  }
+
+  throw { code: 'api_error', message: lastErrMsg || 'সার্ভার অতিরিক্ত ব্যস্ত রয়েছে। অনুগ্রহ করে কয়েক সেকেন্ড পর আবার চেষ্টা করুন।', text: '' };
+}
+
 const prefs = Object.assign({ar:true, tl:false, bn:true, en:true, fs:25, lang:'bn'}, store.get('prefs', {}));
-(async () => {
-  if (!window.claude || !claude.use) return;
-  try { sample = await claude.use('sample'); } catch(e) { sample = null; }
-  if (sample) document.body.classList.add('ai-on');
-})();
+document.body.classList.add('ai-on');
+
 function aiError(e){
   const c = e && e.code;
   if (['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)) { document.body.classList.remove('ai-on'); return 'এই ফিচার ব্যবহারের অনুমতি দেওয়া হয়নি।'; }
   if (c === 'rate_limited') return 'অনেক বেশি অনুরোধ হয়েছে। একটু পরে আবার চেষ্টা করুন।';
   if (c === 'session_expired') return 'আবার সাইন ইন করে চেষ্টা করুন।';
   if (c === 'refused') return 'এই প্রশ্নের উত্তর দেওয়া যায়নি। অন্যভাবে জিজ্ঞেস করে দেখুন।';
+  if (e && e.message) return e.message;
   return 'উত্তর আনতে সমস্যা হয়েছে। আবার চেষ্টা করুন।';
 }
 const LNAME = () => prefs.lang === 'en' ? 'English' : 'Bangla (বাংলা)';
