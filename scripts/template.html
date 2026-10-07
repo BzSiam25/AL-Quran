@@ -2,7 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Hind+Siliguri:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
-<<style>
+<style>
 /* Layout: top nav; home = mint hero + 3-column surah grid; reader = one centred column; ask panel slides in from the right. Single light look. */
 :root{
   color-scheme:light;
@@ -14,6 +14,7 @@
   --f-ui:"Plus Jakarta Sans","Hind Siliguri",system-ui,sans-serif;
   --ar-size:25px;
 }
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.55}
@@ -200,6 +201,27 @@ button{cursor:pointer}
   padding:6px 14px;border-radius:999px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
 .toast.on{opacity:1}
 
+/* account */
+.acct{position:relative;display:flex;align-items:center}
+.avatar{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--mint) center/cover no-repeat;color:var(--green-dark);font-weight:600;font-size:14px;padding:0;display:grid;place-items:center}
+.menu{position:absolute;right:0;top:calc(100% + 8px);width:min(280px,86vw);background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 12px 32px rgba(20,50,35,.14);display:grid;gap:4px;z-index:30}
+.menu b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu small{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu p{margin:6px 0 8px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(15,30,22,.35);display:grid;place-items:center;padding:16px}
+.modal-card{position:relative;background:var(--bg);border-radius:22px;padding:28px 24px 22px;width:min(400px,100%);display:grid;gap:12px;box-shadow:0 20px 50px rgba(20,50,35,.2)}
+.modal-card h3{margin:0;font-size:20px;letter-spacing:-.01em;padding-right:24px}
+.modal-card p{margin:0;font-family:var(--f-bn);color:var(--muted);font-size:15px;line-height:1.7}
+.modal-card .x{position:absolute;top:12px;right:12px}
+.modal-card small{color:#b4533f;font-size:13px;min-height:1em}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:11px 16px;font-weight:600;font-size:14.5px}
+.gbtn:hover{border-color:var(--green)}
+.gbtn svg{width:20px;height:20px}
+.btn.sm{padding:4px 8px;font-size:12.5px}
+.hist-item{display:grid;gap:2px;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 14px;font-family:var(--f-bn)}
+.hist-item:hover{border-color:var(--green)}
+.hist-item small{color:var(--muted);font-family:var(--f-ui);font-size:12px}
+.saved-tag{font-weight:500;color:var(--muted);font-size:12px}
 @media (max-width:960px){ .grid,.notes-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:640px){
   .wrap{padding-inline:14px}
@@ -226,6 +248,15 @@ button{cursor:pointer}
     <button class="nlink hide-sm" data-nav="juz">Juz</button>
     <button class="nlink" data-nav="notes">My Notes<span class="count" id="ncount" hidden>0</span></button>
     <button class="pill ai-only" id="openask">Ask</button>
+    <div class="acct">
+      <button class="pill signin" id="signin" hidden>Sign in</button>
+      <button class="avatar" id="avatar" hidden aria-haspopup="true" aria-expanded="false" aria-label="Account"></button>
+      <div class="menu" id="acctmenu" hidden>
+        <b id="acctname"></b><small id="acctmail"></small>
+        <p>Your highlights, notes, explanations and questions are private to this account.</p>
+        <button class="btn" id="signout">Sign out</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -272,7 +303,7 @@ button{cursor:pointer}
         <label class="search" id="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
           <input id="q" type="search" placeholder="Search surah · সূরা খুঁজুন" aria-label="Search surah"></label>
       </div>
-      <div class="sort" id="sortrow"><span>Sort by: <button id="sort">Ascending</button></span><span class="sync"><span class="dot" id="syncdot"></span><span id="synctext">Notes saved in this browser</span></span></div>
+      <div class="sort" id="sortrow"><span>Sort by: <button id="sort">Ascending</button></span><span class="sync"><span class="dot" id="syncdot"></span><span id="synctext">Sign in to save notes</span></span></div>
       <div id="listing"></div>
     </section>
   </div>
@@ -297,6 +328,8 @@ button{cursor:pointer}
 <aside class="panel" id="panel" aria-label="Ask a question">
   <div class="p-head">
     <h3>Ask a question</h3>
+    <button class="btn ghost sm" id="hist" title="Previous conversations">History</button>
+    <button class="btn ghost sm" id="newchat" title="Start a new conversation">New</button>
     <div class="lang" id="lang"><button data-l="bn" aria-pressed="true">বাংলা</button><button data-l="en" aria-pressed="false">EN</button></div>
     <button class="x" id="closeask" aria-label="Close">×</button>
   </div>
@@ -309,6 +342,15 @@ button{cursor:pointer}
     </div>
   </div>
 </aside>
+<div class="modal" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gate-t">
+  <div class="modal-card">
+    <button class="x" id="gateclose" aria-label="Close">×</button>
+    <h3 id="gate-t">Sign in to keep your own notes</h3>
+    <p>নিজের অ্যাকাউন্টে হাইলাইট, নোট, আয়াতের ব্যাখ্যা আর প্রশ্নোত্তর সেভ থাকবে। শুধু আপনি দেখতে পাবেন, আর যেকোনো ডিভাইসে পাবেন।</p>
+    <button class="gbtn" id="gatego"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continue with Google</button>
+    <small id="gatemsg"></small>
+  </div>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -331,42 +373,155 @@ const ICON = {
 const cache = {};
 let cur = 0, tab = 'surah', asc = true;
 
+/* ---------- account: Google sign-in + private per-user data (Firebase) ----------
+   Everything a person saves lives under users/<their uid>/ in Firestore:
+     marks/<s:a>         highlight colour + note
+     explanations/<s:a>  saved AI explanation
+     chats/<id>          Ask conversations
+     (users/<uid>.pos)   where they stopped reading
+   firestore.rules lets each signed-in person reach only their own folder. */
+const FIREBASE_VER = '10.14.1';
+let fb = null, user = null, udoc = null, unsubs = [];
+let marks = {}, explains = {};
+let authState = 'loading';           // loading | unavailable | out | in
+
+function loadScript(src){
+  return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+}
+async function initAccount(){
+  let cfg = null;
+  try { const r = await fetch('/api/config'); if (r.ok) cfg = (await r.json()).firebase; } catch(e) {}
+  if (!cfg || !cfg.apiKey) { authState = 'unavailable'; renderAuth(); return; }
+  try {
+    for (const m of ['app', 'auth', 'firestore']) await loadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-${m}-compat.js`);
+    firebase.initializeApp(cfg);
+    fb = { auth: firebase.auth(), db: firebase.firestore() };
+  } catch(e) { authState = 'unavailable'; renderAuth(); return; }
+  fb.auth.getRedirectResult().catch(e => gateError(e));
+  fb.auth.onAuthStateChanged(onUser);
+}
+function stopListening(){ unsubs.forEach(u => { try { u(); } catch(e){} }); unsubs = []; }
+async function onUser(u){
+  stopListening();
+  user = u; udoc = u ? fb.db.collection('users').doc(u.uid) : null;
+  marks = {}; explains = {};
+  newChat();
+  authState = u ? 'in' : 'out';
+  renderAuth(); repaintAll();
+  if (!u) return;
+  $('#gate').hidden = true;
+
+  // Bring over highlights/notes saved in this browser before accounts existed.
+  const local = store.get('marks', {});
+  const keys = Object.keys(local);
+  if (keys.length) {
+    try {
+      for (let i = 0; i < keys.length; i += 400) {
+        const b = fb.db.batch();
+        keys.slice(i, i + 400).forEach(k => b.set(udoc.collection('marks').doc(k), local[k], { merge: true }));
+        await b.commit();
+      }
+      store.set('marks', {});
+      toast(`${keys.length} saved item(s) moved to your account`);
+    } catch(e) {}
+  }
+
+  unsubs.push(udoc.collection('marks').onSnapshot(snap => {
+    marks = {}; snap.forEach(d => { marks[d.id] = d.data(); });
+    repaintAll();
+  }, () => {}));
+  unsubs.push(udoc.collection('explanations').onSnapshot(snap => {
+    explains = {}; snap.forEach(d => { explains[d.id] = d.data(); });
+    repaintAll();
+  }, () => {}));
+  try {
+    const d = await udoc.get();
+    const pos = d.exists && d.data().pos;
+    const localPos = store.get('pos', null);
+    if (pos && (!localPos || (pos.t || 0) > (localPos.t || 0))) { store.set('pos', pos); if (!$('#home').hidden) renderCont(); }
+  } catch(e) {}
+  loadLatestChat();
+}
+function repaintAll(){
+  document.querySelectorAll('.ayah').forEach(el => paintAyah(el.dataset.k));
+  updateCount();
+  if (tab === 'notes' && !$('#home').hidden) renderListing();
+}
+function renderAuth(){
+  $('#signin').hidden = authState !== 'out';
+  $('#avatar').hidden = authState !== 'in';
+  if (authState !== 'in') $('#acctmenu').hidden = true;
+  const dot = $('#syncdot'), txt = $('#synctext');
+  dot.classList.toggle('on', authState === 'in');
+  if (authState === 'in') {
+    const name = user.displayName || user.email || 'Your account';
+    const av = $('#avatar');
+    av.textContent = user.photoURL ? '' : name.trim()[0].toUpperCase();
+    av.style.backgroundImage = user.photoURL ? `url("${user.photoURL.replace(/"/g, '')}")` : '';
+    $('#acctname').textContent = name; $('#acctmail').textContent = user.email || '';
+    txt.textContent = 'Saved privately to your account';
+  } else if (authState === 'out') txt.textContent = 'Sign in to save highlights & notes';
+  else if (authState === 'unavailable') txt.textContent = 'Sign-in is not set up on this server';
+  else txt.textContent = 'Checking sign-in…';
+}
+// Returns true when signed in; otherwise shows the sign-in prompt.
+function needUser(){
+  if (user) return true;
+  if (authState === 'unavailable') { toast('Sign-in is not set up on this server yet'); return false; }
+  $('#gatemsg').textContent = ''; $('#gate').hidden = false; $('#gatego').focus();
+  return false;
+}
+function gateError(e){
+  const c = e && e.code;
+  if (!c || c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+  const msg = c === 'auth/unauthorized-domain' ? 'এই ডোমেইনটা Firebase-এ অনুমোদিত নয়। Firebase → Authentication → Settings → Authorized domains-এ যোগ করুন।'
+    : c === 'auth/network-request-failed' ? 'ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।'
+    : 'সাইন ইন হয়নি। আবার চেষ্টা করুন।';
+  $('#gatemsg').textContent = msg; $('#gate').hidden = false;
+}
+async function signIn(){
+  if (!fb) return;
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({ prompt: 'select_account' });
+  try { await fb.auth.signInWithPopup(p); }
+  catch(e) {
+    if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment')) {
+      try { await fb.auth.signInWithRedirect(p); } catch(e2) { gateError(e2); }
+    } else gateError(e);
+  }
+}
+$('#signin').onclick = () => { $('#gatemsg').textContent = ''; $('#gate').hidden = false; };
+$('#gatego').onclick = signIn;
+$('#gateclose').onclick = () => { $('#gate').hidden = true; };
+$('#gate').addEventListener('click', e => { if (e.target.id === 'gate') $('#gate').hidden = true; });
+$('#avatar').onclick = e => { e.stopPropagation(); const m = $('#acctmenu'); m.hidden = !m.hidden; $('#avatar').setAttribute('aria-expanded', !m.hidden); };
+document.addEventListener('click', e => { if (!e.target.closest('.acct')) $('#acctmenu').hidden = true; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#gate').hidden = true; $('#acctmenu').hidden = true; } });
+$('#signout').onclick = async () => { $('#acctmenu').hidden = true; try { await fb.auth.signOut(); toast('Signed out'); } catch(e) {} };
+
 /* ---------- marks: highlights + notes ---------- */
-let marks = store.get('marks', {});
-let col = null; const chains = {};
-function saveLocal(){ store.set('marks', marks); }
 function setMark(key, patch){
+  if (!needUser()) return;
   const m = Object.assign({}, marks[key] || {}, patch, {t: Date.now()});
   if (!m.c) delete m.c; if (!m.n) delete m.n;
   const empty = !m.c && !m.n;
   if (empty) delete marks[key]; else marks[key] = m;
-  saveLocal(); paintAyah(key); updateCount(); if (tab === 'notes' && !$('#home').hidden) renderListing();
-  if (col) {
-    const ref = col.doc(key);
-    chains[key] = (chains[key] || Promise.resolve()).then(() => empty ? ref.delete() : ref.set(m))
-      .catch(e => toast(e && e.code === 'quota_exceeded' ? 'Storage full. Delete some notes.' : 'Not synced. Saved in this browser.'));
-  }
+  repaintAll();
+  const ref = udoc.collection('marks').doc(key);
+  (empty ? ref.delete() : ref.set(m)).catch(() => toast('Could not save. Check your connection.'));
 }
-async function startSync(){
-  if (!window.claude || !claude.use) return;
-  try {
-    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
-    if (!db || !user) return;
-    const uid = await user.id(); if (!uid) return;
-    col = db.collection('data/users/' + uid);
-    let first = true;
-    col.onSnapshot(snap => {
-      const remote = {};
-      snap.docs.forEach(d => { if (d.exists) remote[d.id] = d.data(); });
-      if (first) { first = false; Object.keys(marks).forEach(k => { if (!remote[k]) { remote[k] = marks[k]; col.doc(k).set(marks[k]).catch(()=>{}); } }); }
-      marks = remote; saveLocal();
-      document.querySelectorAll('.ayah').forEach(el => paintAyah(el.dataset.k));
-      updateCount(); if (tab === 'notes' && !$('#home').hidden) renderListing();
-      $('#syncdot').classList.add('on'); $('#synctext').textContent = 'Notes synced to your account';
-    }, () => { col = null; $('#syncdot').classList.remove('on'); $('#synctext').textContent = 'Notes saved in this browser'; });
-  } catch (e) {}
+function updateCount(){ const n = new Set([...Object.keys(marks), ...Object.keys(explains)]).size; const c = $('#ncount'); c.hidden = !n; c.textContent = n; }
+
+/* reading position: this device right away, the account at most every few seconds */
+let posTimer = null, posPending = null;
+function savePos(n, a){
+  const pos = {n, a, t: Date.now()};
+  store.set('pos', pos);
+  if (!udoc) return;
+  posPending = pos;
+  if (posTimer) return;
+  posTimer = setTimeout(() => { posTimer = null; if (udoc && posPending) udoc.set({pos: posPending}, {merge: true}).catch(()=>{}); posPending = null; }, 4000);
 }
-function updateCount(){ const n = Object.keys(marks).length; const c = $('#ncount'); c.hidden = !n; c.textContent = n; }
 
 /* ---------- AI (Gemini via our own server: api/gemini.js) ---------- */
 // The key lives on the server (api/gemini.js), never in this file.
@@ -384,16 +539,18 @@ async function sampleRaw(input, options = {}) {
     }));
   }
 
+  if (!user) throw { code: 'signin', message: 'Explain আর Ask ব্যবহার করতে আগে সাইন ইন করুন।', text: '' };
+  const token = await user.getIdToken();
   const response = await fetch(AI_ENDPOINT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
     body: JSON.stringify({ contents }),
     signal
   });
 
   if (!response.ok) {
     let errMsg = `AI server error (${response.status})`;
-    try { const j = await response.json(); if (j.error) errMsg = j.error; } catch(e) {}
+    try { const j = await response.json(); if (j.error) errMsg = j.error; if (j.code === 'signin') throw { code: 'signin', message: errMsg, text: '' }; } catch(e) { if (e && e.code === 'signin') throw e; }
     if (response.status === 404) errMsg = 'AI সার্ভার পাওয়া যায়নি। সাইটটা Vercel-এ (বা লোকালি `vercel dev` দিয়ে) চালালে Explain আর Ask কাজ করবে।';
     throw { code: 'api_error', message: errMsg, text: '' };
   }
@@ -451,6 +608,7 @@ document.body.classList.add('ai-on');
 function aiError(e){
   const c = e && e.code;
   if (['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)) { document.body.classList.remove('ai-on'); return 'এই ফিচার ব্যবহারের অনুমতি দেওয়া হয়নি।'; }
+  if (c === 'signin') { needUser(); return 'Explain আর Ask ব্যবহার করতে আগে সাইন ইন করুন।'; }
   if (c === 'rate_limited') return 'অনেক বেশি অনুরোধ হয়েছে। একটু পরে আবার চেষ্টা করুন।';
   if (c === 'session_expired') return 'আবার সাইন ইন করে চেষ্টা করুন।';
   if (c === 'refused') return 'এই প্রশ্নের উত্তর দেওয়া যায়নি। অন্যভাবে জিজ্ঞেস করে দেখুন।';
@@ -509,15 +667,24 @@ function renderListing(){
       <span class="rt"><span class="ar">الجزء ${arNum(no)}</span></span></button>`; }).join('')}</div>`;
   } else renderNotes();
 }
+const plain = t => String(t).replace(/[#*_>`]/g, '').replace(/\s+/g, ' ').trim();
 async function renderNotes(){
-  const keys = Object.keys(marks).sort((x,y)=>{const [a,b]=x.split(':').map(Number),[c,d]=y.split(':').map(Number);return a-c||b-d});
-  if (!keys.length) { $('#listing').innerHTML = '<p class="empty">Nothing saved yet. Open a surah and use the <b>Highlight</b> or <b>Note</b> icon next to any ayah. It will appear here.</p>'; return; }
+  if (!user) {
+    $('#listing').innerHTML = authState === 'unavailable'
+      ? '<p class="empty">Sign-in is not set up on this server yet.</p>'
+      : '<p class="empty">Sign in with Google to keep your own highlights, notes and explanations. Only you can see them, on any device.<br><br><button class="btn pri" onclick="needUser()">Sign in</button></p>';
+    return;
+  }
+  const byRef = (x,y)=>{const [a,b]=x.split(':').map(Number),[c,d]=y.split(':').map(Number);return a-c||b-d};
+  const keys = [...new Set([...Object.keys(marks), ...Object.keys(explains)])].sort(byRef);
+  if (!keys.length) { $('#listing').innerHTML = '<p class="empty">Nothing saved yet. Open a surah and use the <b>Highlight</b>, <b>Note</b> or <b>Explain</b> icon next to any ayah. It will appear here.</p>'; return; }
   $('#listing').innerHTML = `<div class="notes-grid">${keys.map(k => {
-    const [n, a] = k.split(':').map(Number), m = marks[k];
-    const text = m.n ? esc(m.n) : (cache[n] ? esc(cache[n][a-1][1]) : 'Highlighted ayah');
-    return `<button class="note-card" data-open="${n}" data-ayah="${a}"><span class="ref"><span class="cdot" ${m.c?`data-c="${m.c}"`:''}></span>${esc(S[n-1][2])} ${n}:${a}${m.n?' · Note':''}</span><span class="txt${m.n?'':' dim'}">${text}</span></button>`;
+    const [n, a] = k.split(':').map(Number), m = marks[k] || {}, ex = explains[k];
+    const tags = [m.n && 'Note', ex && 'Explained'].filter(Boolean).join(' · ');
+    const text = m.n ? esc(m.n) : ex ? esc(plain(ex.text).slice(0, 220)) : (cache[n] ? esc(cache[n][a-1][1]) : 'Highlighted ayah');
+    return `<button class="note-card" data-open="${n}" data-ayah="${a}"><span class="ref"><span class="cdot" ${m.c?`data-c="${m.c}"`:''}></span>${esc(S[n-1][2])} ${n}:${a}${tags?' · '+tags:''}</span><span class="txt${m.n||ex?'':' dim'}">${text}</span></button>`;
   }).join('')}</div>`;
-  const need = [...new Set(keys.filter(k => !marks[k].n).map(k => +k.split(':')[0]).filter(n => !cache[n]))].slice(0, 6);
+  const need = [...new Set(keys.filter(k => !(marks[k]||{}).n && !explains[k]).map(k => +k.split(':')[0]).filter(n => !cache[n]))].slice(0, 6);
   if (need.length) { await Promise.all(need.map(n => load(n).catch(()=>{}))); if (tab === 'notes' && !$('#home').hidden) renderNotes(); }
 }
 function showHome(t){
@@ -583,6 +750,7 @@ function paintAyah(k){
   const slot = el.querySelector('.slot-note');
   if (!slot.querySelector('.note-edit')) slot.innerHTML = m.n ? `<div class="note-view">${esc(m.n)}</div>` : '';
   el.querySelector('[data-act="note"]').classList.toggle('has', !!m.n);
+  el.querySelector('[data-act="ex"]').classList.toggle('has', !!explains[k]);
 }
 let io = null;
 async function openSurah(n, ayah){
@@ -613,13 +781,13 @@ async function openSurah(n, ayah){
   applyPrefs();
   Object.keys(marks).forEach(k => { if (k.startsWith(n+':')) paintAyah(k); });
   $('#jump').max = s[6]; $('#jump').value = '';
-  if (ayah) goAyah(ayah); else store.set('pos', {n, a: 1});
+  if (ayah) goAyah(ayah); else savePos(n, 1);
   if (io) io.disconnect();
   let tmr;
   io = new IntersectionObserver(es => {
     const vis = es.filter(x => x.isIntersecting).map(x => +x.target.id.slice(1));
     if (!vis.length) return;
-    clearTimeout(tmr); tmr = setTimeout(() => store.set('pos', {n, a: Math.min(...vis)}), 600);
+    clearTimeout(tmr); tmr = setTimeout(() => savePos(n, Math.min(...vis)), 600);
   }, {rootMargin: '-140px 0px -60% 0px'});
   document.querySelectorAll('.ayah').forEach(el => io.observe(el));
 }
@@ -637,6 +805,7 @@ $('#page').addEventListener('click', async e => {
   if (sw) { setMark(k, {c: (marks[k]||{}).c === sw.dataset.c ? '' : sw.dataset.c}); return; }
   if (e.target.closest('.sw-clear')) { setMark(k, {c: ''}); return; }
   const act = e.target.closest('[data-act]'); const t = act && act.dataset.act;
+  if ((t === 'hl' || t === 'note' || t === 'ex' || t === 'ask') && !needUser()) return;
   if (t === 'hl') {
     const slot = art.querySelector('.slot-pal'), open = !!slot.innerHTML;
     slot.innerHTML = open ? '' : `<div class="palette" role="group" aria-label="Highlight colour">${COLORS.map(c=>`<button class="sw" data-c="${c}" aria-label="${c}" aria-pressed="${(marks[k]||{}).c===c}"></button>`).join('')}<button class="sw-clear">Remove</button></div>`;
@@ -668,39 +837,98 @@ $('#page').addEventListener('click', async e => {
     catch(err){ const r = document.createRange(); r.selectNodeContents(art); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast('Selected. Press Ctrl+C to copy'); }
   }
 });
+function exHead(k, saved){
+  const when = saved && saved.t ? new Date(saved.t).toLocaleDateString() : '';
+  return `<span>Explanation · ${k}${saved ? ` <span class="saved-tag">· saved${when ? ' ' + when : ''}</span>` : ''}</span><span class="row"><button class="btn ghost" data-ex="again">Regenerate</button><button class="btn ghost" data-ex="close">Close</button></span>`;
+}
 async function explain(art, n, i, again){
-  if (!sample) return;
+  if (!needUser()) return;
   const k = `${n}:${i+1}`, slot = art.querySelector('.slot-ex');
   exCtl[k] && exCtl[k].abort();
+  const saved = explains[k];
+  if (saved && !again) {
+    slot.innerHTML = `<div class="explain"><div class="explain-h">${exHead(k, saved)}</div><div class="md">${md(saved.text)}</div></div>`;
+    return;
+  }
   const ctl = exCtl[k] = new AbortController();
-  slot.innerHTML = `<div class="explain"><div class="explain-h"><span>Explanation · ${n}:${i+1}</span><span class="row"><button class="btn ghost" data-ex="stop">Stop</button><button class="btn ghost" data-ex="close">Close</button></span></div><div class="md"><div class="thinking">Writing explanation…</div></div></div>`;
-  const box = slot.querySelector('.md'), head = slot.querySelector('.explain-h .row');
+  slot.innerHTML = `<div class="explain"><div class="explain-h"><span>Explanation · ${k}</span><span class="row"><button class="btn ghost" data-ex="stop">Stop</button><button class="btn ghost" data-ex="close">Close</button></span></div><div class="md"><div class="thinking">Writing explanation…</div></div></div>`;
+  const box = slot.querySelector('.md'), head = slot.querySelector('.explain-h');
   const prompt = `You are helping a Muslim reader study the Quran in a personal reading app. Explain the verse below in ${LNAME()} for a thoughtful general reader.
 Use short bold headings for: background/context (mention the occasion of revelation only if it is well established), meaning of the verse, and key lessons for daily life. Where useful, draw on classical tafsir (for example Ibn Kathir, al-Tabari, al-Qurtubi) and name the source when you rely on it. Never invent hadith, narrations or references; if scholars differ, say so briefly. About 200–300 words, plain Markdown, no preamble.
 
 ${ayahBlock(n, i)}`;
+  let done = null;
   try {
-    const {truncated} = await sample(prompt, {signal: ctl.signal, onText: ({text}) => { box.innerHTML = md(text); }, cache: again ? {gcTime: 86400000, refresh: true} : {gcTime: 86400000}});
-    if (truncated) box.insertAdjacentHTML('beforeend', '<p class="err">উত্তর মাঝপথে থেমে গেছে।</p>');
+    const {text} = await sample(prompt, {signal: ctl.signal, onText: ({text}) => { box.innerHTML = md(text); }});
+    if (text && text.trim()) done = text;
   } catch(err) {
     if (err && err.code === 'cancelled') { if (!err.text) { slot.innerHTML = ''; return; } }
     else box.innerHTML = (err && err.text ? md(err.text) : '') + `<p class="err">${aiError(err)}</p>`;
   }
-  if (slot.querySelector('.explain')) head.innerHTML = '<button class="btn ghost" data-ex="again">Regenerate</button><button class="btn ghost" data-ex="close">Close</button>';
+  if (!slot.querySelector('.explain')) return;
+  if (done && udoc) {
+    const rec = {text: done, lang: prefs.lang, t: Date.now()};
+    explains[k] = rec; paintAyah(k); updateCount();
+    udoc.collection('explanations').doc(k).set(rec).catch(() => toast('Explanation shown but not saved. Check your connection.'));
+    head.innerHTML = exHead(k, rec);
+  } else head.innerHTML = exHead(k, null);
 }
 
 /* ---------- ask panel ---------- */
-let turns = [], ctx = null, askCtl = null;
+let turns = [], ctx = null, askCtl = null, chatId = null, chatView = 'chat';
+const MAX_SAVED_MSGS = 40;
+function newChat(){ if (askCtl) askCtl.abort(); turns = []; chatId = null; chatView = 'chat'; if ($('#panel').classList.contains('open')) renderChat(); }
+async function loadLatestChat(){
+  if (!udoc) return;
+  try {
+    const q = await udoc.collection('chats').orderBy('t', 'desc').limit(1).get();
+    if (!q.empty && !turns.length) openChat(q.docs[0]);
+  } catch(e) {}
+}
+function openChat(d){
+  const c = d.data();
+  chatId = d.id; chatView = 'chat';
+  turns = (c.messages || []).map(m => ({role: m.role, content: m.content, show: m.show || m.content, tag: m.tag || ''}));
+  if ($('#panel').classList.contains('open')) renderChat();
+}
+function saveChat(){
+  if (!udoc) return;
+  const msgs = turns.filter(t => t.content).slice(-MAX_SAVED_MSGS).map(t => ({role: t.role, content: t.content, show: t.show || '', tag: t.tag || ''}));
+  if (!msgs.length) return;
+  const ref = chatId ? udoc.collection('chats').doc(chatId) : udoc.collection('chats').doc();
+  chatId = ref.id;
+  const first = msgs.find(m => m.role === 'user');
+  ref.set({t: Date.now(), title: (first ? first.show : '').slice(0, 80), messages: msgs}).catch(() => toast('Conversation not saved. Check your connection.'));
+}
+async function renderHistory(){
+  const c = $('#chat');
+  c.innerHTML = '<div class="thinking">Loading…</div>';
+  try {
+    const q = await udoc.collection('chats').orderBy('t', 'desc').limit(30).get();
+    if (chatView !== 'history') return;
+    c.innerHTML = q.empty ? '<p class="unavail">No saved conversations yet.</p>'
+      : `<div class="sugs"><p>আগের প্রশ্নোত্তর (শুধু আপনি দেখতে পান)</p>${q.docs.map(d => { const v = d.data(); return `<button class="hist-item" data-chat="${d.id}">${esc(v.title || 'Conversation')}<small>${new Date(v.t).toLocaleString()} · ${(v.messages||[]).length} messages</small></button>`; }).join('')}</div>`;
+    c._docs = Object.fromEntries(q.docs.map(d => [d.id, d]));
+  } catch(e) { c.innerHTML = '<p class="unavail">Could not load your conversations. Check your connection.</p>'; }
+}
+$('#newchat').onclick = () => { if (needUser()) { newChat(); renderChat(); $('#askbox').focus(); } };
+$('#hist').onclick = () => { if (!needUser()) return; chatView = chatView === 'history' ? 'chat' : 'history'; renderChat(); };
 const RULES = () => `You are a knowledgeable, careful study companion inside a personal Quran reading app (Arabic text with Bangla and English translations). Reply in ${LNAME()} unless the user clearly writes in another language, then match them.
 Ground answers in the Quran (cite verses as Surah:Ayah) and well-known tafsir and authentic hadith collections; name sources when you rely on them and never invent verses, hadith or references. If scholars differ, say so briefly and fairly. For personal religious rulings give the general view and suggest consulting a qualified scholar. Be concise and clear: short paragraphs or bullet lists, plain Markdown.`;
-function openPanel(){ $('#panel').classList.add('open'); renderChat(); setTimeout(() => $('#askbox').focus(), 260); }
+function openPanel(){ $('#panel').classList.add('open'); chatView = 'chat'; renderChat(); if (user) setTimeout(() => $('#askbox').focus(), 260); }
 $('#openask').onclick = () => { if (!ctx && cur && !$('#reader').hidden) setContext(cur, null); openPanel(); };
 $('#closeask').onclick = () => $('#panel').classList.remove('open');
 function setContext(n, i){ ctx = {n, i}; $('#ctx').hidden = false; $('#ctxlabel').textContent = i === null ? `Context: Surah ${S[n-1][2]}` : `Context: ${S[n-1][2]} ${n}:${i+1}`; }
 $('#ctxclear').onclick = () => { ctx = null; $('#ctx').hidden = true; };
 function renderChat(){
   const c = $('#chat');
-  if (!sample) { c.innerHTML = '<p class="unavail">Questions and explanations work when this page is opened on claude.ai while signed in.</p>'; return; }
+  $('#hist').textContent = chatView === 'history' ? 'Back' : 'History';
+  if (!user) {
+    c.innerHTML = authState === 'unavailable' ? '<p class="unavail">Sign-in is not set up on this server yet.</p>'
+      : '<div class="sugs"><p>প্রশ্ন করতে আর আগের প্রশ্নোত্তর সেভ রাখতে Google দিয়ে সাইন ইন করুন। আপনার প্রশ্ন শুধু আপনি দেখতে পাবেন।</p><button class="btn pri" onclick="needUser()">Sign in</button></div>';
+    return;
+  }
+  if (chatView === 'history') { renderHistory(); return; }
   if (!turns.length) {
     const s = cur ? S[cur-1] : null;
     const sugs = [ s ? `সূরা ${s[2]}-এর মূল বিষয়বস্তু কী?` : 'সূরা আল-ফাতিহার মূল শিক্ষা কী?', 'কুরআনে ধৈর্য (সবর) সম্পর্কে কী বলা হয়েছে?', 'মাক্কী ও মাদানী সূরার পার্থক্য কী?' ];
@@ -712,11 +940,17 @@ function renderChat(){
     : `<div class="msg a md">${t.html || md(t.content)}</div>`).join('');
   c.scrollTop = c.scrollHeight;
 }
-$('#chat').addEventListener('click', e => { const s = e.target.closest('.sug'); if (s) { $('#askbox').value = s.textContent; send(); } });
+$('#chat').addEventListener('click', e => {
+  const s = e.target.closest('.sug'); if (s) { $('#askbox').value = s.textContent; send(); return; }
+  const h = e.target.closest('[data-chat]'); const docs = $('#chat')._docs;
+  if (h && docs && docs[h.dataset.chat]) { if (askCtl) askCtl.abort(); openChat(docs[h.dataset.chat]); renderChat(); }
+});
 async function send(){
   if (askCtl) { askCtl.abort(); return; }
   const q = $('#askbox').value.trim();
-  if (!q || !sample) return;
+  if (!q) return;
+  if (!needUser()) return;
+  chatView = 'chat';
   let content = q, tag = '';
   if (ctx) {
     if (ctx.i === null) { const s = S[ctx.n-1]; content = `[Context: the reader is reading Surah ${s[2]} (${s[1]}), surah ${ctx.n}, ${s[6]} verses]\n\n${q}`; tag = `Surah ${s[2]}`; }
@@ -740,6 +974,7 @@ async function send(){
     if (!reply.content && err && err.code === 'cancelled') turns.pop();
   }
   askCtl = null; $('#send').textContent = 'Send'; renderChat();
+  if (reply.content) saveChat();
 }
 $('#send').onclick = send;
 function autoGrow(){ const t = $('#askbox'); t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight) + 'px'; }
@@ -748,8 +983,8 @@ $('#askbox').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shif
 
 let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1800); }
 
-applyPrefs(); updateCount();
+applyPrefs(); updateCount(); renderAuth();
 const h = location.hash.match(/^#s(\d+)$/);
 if (h) openSurah(+h[1]); else showHome('surah');
-startSync();
+initAccount();
 </script>
