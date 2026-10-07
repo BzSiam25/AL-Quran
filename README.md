@@ -12,7 +12,11 @@ al-quran/
 ├── data/
 │   ├── 1.json ... 114.json   # one file per surah
 ├── api/
-│   └── gemini.js         # Vercel function: calls Gemini with the secret key (model fallback + streaming)
+│   ├── gemini.js         # Vercel function: calls Gemini with the secret key (signed-in users only)
+│   ├── config.js         # gives the browser the public Firebase web config
+│   └── _firebase.js      # shared: reads FIREBASE_CONFIG, verifies sign-in tokens
+├── firestore.rules       # privacy rules: each user can reach only users/<their uid>/
+├── package.json          # one dependency (jose) for checking sign-in tokens
 ├── vercel.json           # gives the AI function up to 60 s
 ├── .env.example          # template for local testing (copy to .env, never commit .env)
 ├── scripts/
@@ -24,11 +28,36 @@ al-quran/
 
 Each `data/N.json` is an array of verses: `[arabic, bangla, english, transliteration]`.
 
+## Accounts and privacy
+
+People sign in with Google (Firebase Authentication). Anyone can read the Quran without signing in; highlights, notes, Explain and Ask need an account.
+
+Each person's data is stored in Firestore under `users/<their uid>/`:
+
+| Path | What |
+|---|---|
+| `marks/<surah:ayah>` | highlight colour and note |
+| `explanations/<surah:ayah>` | saved AI explanation (opens instantly next time) |
+| `chats/<id>` | Ask conversations (last 40 messages each) |
+| `users/<uid>` field `pos` | where they stopped reading |
+
+`firestore.rules` allows read and write only when `request.auth.uid` matches that folder, so no other user can see or change it. Highlights/notes saved in a browser before accounts existed are moved into the account on first sign-in.
+
 ## AI features (Explain / Ask) and the Gemini key
 
-The browser never sees the Gemini API key. The page posts the question to `/api/gemini`, and `api/gemini.js` (a Vercel serverless function) adds the key from the `GEMINI_API_KEY` environment variable, tries each model in turn, and streams the answer back.
+The browser never sees the Gemini API key. The page posts the question to `/api/gemini` with the user's Firebase sign-in token. `api/gemini.js` checks the token, adds the key from the `GEMINI_API_KEY` environment variable, tries each model in turn, and streams the answer back. Requests without a valid sign-in are refused, so strangers can't use up your Gemini quota.
 
-**Never put the key in `index.html`, `template.html` or any committed file.**
+**Never put the Gemini key in `index.html`, `template.html` or any committed file.** (The Firebase web config is different: it is public by design and only identifies the project.)
+
+## Firebase setup (once)
+
+1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project** (Google Analytics not needed).
+2. **Build → Authentication → Get started → Sign-in method → Google → Enable** → Save.
+3. **Authentication → Settings → Authorized domains → Add domain**: your Vercel domain (e.g. `al-quran.vercel.app`).
+4. **Build → Firestore Database → Create database** → production mode → a nearby location.
+5. **Firestore → Rules**: replace everything with the contents of `firestore.rules` → **Publish**.
+6. **Project settings (gear) → Your apps → Web (`</>`)** → register an app → copy the `firebaseConfig` object.
+7. In Vercel → Settings → Environment Variables add `FIREBASE_CONFIG` and paste that object (JSON or the JS form Firebase shows both work). Redeploy.
 
 ## Run locally
 
@@ -42,7 +71,7 @@ With Explain / Ask, use the Vercel CLI so `/api/gemini` runs too:
 
 ```bash
 npm i -g vercel
-cp .env.example .env         # then put your key in .env
+cp .env.example .env         # then fill in GEMINI_API_KEY and FIREBASE_CONFIG
 vercel dev                   # opens on http://localhost:3000
 ```
 
@@ -50,14 +79,12 @@ vercel dev                   # opens on http://localhost:3000
 
 1. Go to vercel.com, sign in with GitHub, **Add New → Project**, import this repo.
 2. Framework preset: **Other**. Leave the build command empty.
-3. Under **Environment Variables** add `GEMINI_API_KEY` = your key.
+3. Under **Environment Variables** add `GEMINI_API_KEY` (your Gemini key) and `FIREBASE_CONFIG` (see Firebase setup).
 4. **Deploy.** Every push to `main` redeploys automatically.
 
 To change the key later: Settings → Environment Variables, edit it, then **Redeploy**.
 
-Static hosts without functions (GitHub Pages, Netlify Drop) still serve the reader, highlights and notes; only Explain / Ask will show an error there.
-
-Highlights and notes are saved in the browser (localStorage), per device.
+Static hosts without functions (GitHub Pages, Netlify Drop) still serve the reader, but sign-in, notes and AI need the `/api` routes, so use Vercel.
 
 ## Rebuild the data
 
