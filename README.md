@@ -11,6 +11,10 @@ al-quran/
 ├── index.html            # the whole site (HTML + CSS + JS in one file)
 ├── data/
 │   ├── 1.json ... 114.json   # one file per surah
+├── api/
+│   └── gemini.js         # Vercel function: calls Gemini with the secret key (model fallback + streaming)
+├── vercel.json           # gives the AI function up to 60 s
+├── .env.example          # template for local testing (copy to .env, never commit .env)
 ├── scripts/
 │   ├── template.html     # source of index.html (surah list placeholder: __INDEX__)
 │   ├── index-data.json   # surah list (name, meaning, type, verse count)
@@ -20,31 +24,40 @@ al-quran/
 
 Each `data/N.json` is an array of verses: `[arabic, bangla, english, transliteration]`.
 
+## AI features (Explain / Ask) and the Gemini key
+
+The browser never sees the Gemini API key. The page posts the question to `/api/gemini`, and `api/gemini.js` (a Vercel serverless function) adds the key from the `GEMINI_API_KEY` environment variable, tries each model in turn, and streams the answer back.
+
+**Never put the key in `index.html`, `template.html` or any committed file.**
+
 ## Run locally
 
-The page loads surahs with `fetch()`, so open it through a local server, not by double-clicking the file:
+Reading only (no AI), any static server works:
 
 ```bash
-cd al-quran
-python -m http.server 8000
-# then open http://localhost:8000
+python -m http.server 8000   # then open http://localhost:8000
 ```
 
-Or with Node: `npx serve .`
+With Explain / Ask, use the Vercel CLI so `/api/gemini` runs too:
 
-## Deploy
+```bash
+npm i -g vercel
+cp .env.example .env         # then put your key in .env
+vercel dev                   # opens on http://localhost:3000
+```
 
-It is a static site, so any static host works: drag the folder into Netlify, or push it to GitHub and enable GitHub Pages, or `vercel deploy`.
+## Deploy (Vercel, free)
 
-## What works where
+1. Go to vercel.com, sign in with GitHub, **Add New → Project**, import this repo.
+2. Framework preset: **Other**. Leave the build command empty.
+3. Under **Environment Variables** add `GEMINI_API_KEY` = your key.
+4. **Deploy.** Every push to `main` redeploys automatically.
 
-| Feature | On claude.ai | Self-hosted |
-|---|---|---|
-| Reading, search, language toggles, font size | ✅ | ✅ |
-| Highlights and notes | ✅ synced to your Claude account | ✅ saved in this browser only (localStorage) |
-| Explain / Ask (AI) | ✅ uses Claude | ⛔ hidden (needs a backend, e.g. Gemini via a serverless function) |
+To change the key later: Settings → Environment Variables, edit it, then **Redeploy**.
 
-The AI and sync features use claude.ai artifact capabilities (`window.claude`). When the page runs anywhere else, `window.claude` is absent, so those buttons stay hidden and notes fall back to localStorage automatically.
+Static hosts without functions (GitHub Pages, Netlify Drop) still serve the reader, highlights and notes; only Explain / Ask will show an error there.
+
+Highlights and notes are saved in the browser (localStorage), per device.
 
 ## Rebuild the data
 
