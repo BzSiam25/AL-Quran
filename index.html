@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Al Quran</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1d6b49">
+<meta name="description" content="Read the Quran in Arabic with Bangla and English translations, keep private notes, and get verse explanations.">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Al Quran">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Hind+Siliguri:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
@@ -206,6 +215,16 @@ button{cursor:pointer}
   padding:6px 14px;border-radius:999px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
 .toast.on{opacity:1}
 
+/* app install + offline */
+.install{border-color:var(--green);color:var(--green-dark)}
+.install .sm{display:none}
+.nlink,.pill,.logo{white-space:nowrap}
+.install:hover{background:var(--green);color:var(--on-green);border-color:var(--green)}
+.offline-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:28px;padding:14px 18px;border-radius:16px;background:var(--surface);font-size:13.5px;color:var(--muted)}
+.offline-row span{min-width:0;flex:1 1 240px}
+.offline-row.done{background:var(--mint);color:var(--green-dark)}
+@media (max-width:640px){ .logo small{display:none} .install .lg{display:none} .install .sm{display:inline} .nav .wrap{gap:4px} }
+@media (display-mode: standalone){ .nav{padding-top:env(safe-area-inset-top,0px)} }
 /* account */
 .acct{position:relative;display:flex;align-items:center}
 .avatar{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--mint) center/cover no-repeat;color:var(--green-dark);font-weight:600;font-size:14px;padding:0;display:grid;place-items:center}
@@ -256,6 +275,7 @@ button{cursor:pointer}
     <button class="nlink hide-sm" data-nav="juz">Juz</button>
     <button class="nlink" data-nav="notes">My Notes<span class="count" id="ncount" hidden>0</span></button>
     <button class="pill ai-only" id="openask">Ask</button>
+    <button class="pill install" id="install" hidden><span class="lg">Install app</span><span class="sm">Install</span></button>
     <div class="acct">
       <button class="pill signin" id="signin" hidden>Sign in</button>
       <button class="avatar" id="avatar" hidden aria-haspopup="true" aria-expanded="false" aria-label="Account"></button>
@@ -313,6 +333,10 @@ button{cursor:pointer}
       </div>
       <div class="sort" id="sortrow"><span>Sort by: <button id="sort">Ascending</button></span><span class="sync"><span class="dot" id="syncdot"></span><span id="synctext">Sign in to save notes</span></span></div>
       <div id="listing"></div>
+      <div class="offline-row" id="offrow" hidden>
+        <span id="offtext">Read without internet: save all 114 surahs on this device (about 5 MB).</span>
+        <button class="btn" id="offbtn">Download for offline</button>
+      </div>
     </section>
   </div>
 </main>
@@ -357,6 +381,13 @@ button{cursor:pointer}
     <p>নিজের অ্যাকাউন্টে হাইলাইট, নোট, আয়াতের ব্যাখ্যা আর প্রশ্নোত্তর সেভ থাকবে। শুধু আপনি দেখতে পাবেন, আর যেকোনো ডিভাইসে পাবেন।</p>
     <button class="gbtn" id="gatego"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continue with Google</button>
     <small id="gatemsg"></small>
+  </div>
+</div>
+<div class="modal" id="ioshint" hidden role="dialog" aria-modal="true" aria-labelledby="ios-t">
+  <div class="modal-card">
+    <button class="x" id="iosclose" aria-label="Close">×</button>
+    <h3 id="ios-t">Install on iPhone / iPad</h3>
+    <p>১. Safari-র নিচের <b>Share</b> বাটন (বক্স থেকে উপরের দিকে তীর) চাপুন।<br>২. তালিকা থেকে <b>Add to Home Screen</b> বাছুন।<br>৩. উপরে ডানে <b>Add</b> চাপুন। হোম স্ক্রিনে Al Quran অ্যাপ চলে আসবে।</p>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -404,6 +435,7 @@ async function initAccount(){
     for (const m of ['app', 'auth', 'firestore']) await loadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-${m}-compat.js`);
     firebase.initializeApp(cfg);
     fb = { auth: firebase.auth(), db: firebase.firestore() };
+    try { await fb.db.enablePersistence({ synchronizeTabs: true }); } catch(e) {}  // offline notes; fails quietly in private windows
   } catch(e) { authState = 'unavailable'; renderAuth(); return; }
   fb.auth.getRedirectResult().catch(e => gateError(e));
   fb.auth.onAuthStateChanged(onUser);
@@ -615,6 +647,7 @@ document.body.classList.add('ai-on');
 
 function aiError(e){
   const c = e && e.code;
+  if (!navigator.onLine) return 'ইন্টারনেট সংযোগ নেই। Explain আর Ask চালাতে অনলাইনে আসুন।';
   if (['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)) { document.body.classList.remove('ai-on'); return 'এই ফিচার ব্যবহারের অনুমতি দেওয়া হয়নি।'; }
   if (c === 'signin') { needUser(); return 'Explain আর Ask ব্যবহার করতে আগে সাইন ইন করুন।'; }
   if (c === 'rate_limited') return 'অনেক বেশি অনুরোধ হয়েছে। একটু পরে আবার চেষ্টা করুন।';
@@ -994,7 +1027,59 @@ let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add
 applyPrefs(); updateCount(); renderAuth();
 const h = location.hash.match(/^#s(\d+)$/);
 if (h) openSurah(+h[1]); else showHome('surah');
+window.addEventListener('hashchange', () => { const m = location.hash.match(/^#s(\d+)$/); if (m) openSurah(+m[1]); });
 initAccount();
+
+/* ---------- installable app (PWA) + offline ---------- */
+let installEvt = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!isStandalone()) $('#install').hidden = false; });
+window.addEventListener('appinstalled', () => { installEvt = null; $('#install').hidden = true; toast('App installed'); });
+if (isIOS && !isStandalone()) $('#install').hidden = false;
+$('#install').onclick = async () => {
+  if (installEvt) { installEvt.prompt(); const { outcome } = await installEvt.userChoice; installEvt = null; if (outcome === 'accepted') $('#install').hidden = true; }
+  else if (isIOS) $('#ioshint').hidden = false;
+};
+$('#iosclose').onclick = () => { $('#ioshint').hidden = true; };
+$('#ioshint').addEventListener('click', e => { if (e.target.id === 'ioshint') $('#ioshint').hidden = true; });
+
+async function offlineStatus(){
+  if (!('caches' in window)) return 0;
+  try { const c = await caches.open('alq-data-v1'); return (await c.keys()).length; } catch(e) { return 0; }
+}
+async function renderOffline(){
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+  const n = await offlineStatus();
+  $('#offrow').hidden = false;
+  if (n >= 114) { $('#offrow').classList.add('done'); $('#offtext').textContent = 'All 114 surahs are saved on this device. You can read without internet.'; $('#offbtn').hidden = true; }
+}
+$('#offbtn').onclick = () => {
+  const sw = navigator.serviceWorker && navigator.serviceWorker.controller; if (!sw) return;
+  if (!navigator.onLine) { toast('Connect to the internet to download'); return; }
+  const btn = $('#offbtn'); btn.disabled = true; btn.textContent = 'Downloading… 0/114';
+  const ch = new MessageChannel();
+  ch.port1.onmessage = ({ data }) => {
+    btn.textContent = `Downloading… ${data.done}/114`;
+    if (data.done + data.failed >= data.total) {
+      btn.disabled = false;
+      if (data.failed) { btn.textContent = 'Try again'; toast(`${data.failed} surah(s) did not download. Check your connection.`); }
+      else { toast('All surahs saved for offline reading'); renderOffline(); }
+    }
+  };
+  sw.postMessage({ type: 'cache-all' }, [ch.port2]);
+};
+window.addEventListener('offline', () => toast('You are offline. Saved surahs and notes still work.'));
+window.addEventListener('online', () => toast('Back online'));
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready).then(() => {
+      if (navigator.serviceWorker.controller) renderOffline();
+      else navigator.serviceWorker.addEventListener('controllerchange', renderOffline, { once: true });
+    }).catch(() => {});
+  });
+}
 </script>
 
 </body>

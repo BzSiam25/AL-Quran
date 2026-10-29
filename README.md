@@ -16,6 +16,9 @@ al-quran/
 │   ├── config.js         # gives the browser the public Firebase web config
 │   └── _firebase.js      # shared: reads FIREBASE_CONFIG, verifies sign-in tokens
 ├── firestore.rules       # privacy rules: each user can reach only users/<their uid>/
+├── manifest.webmanifest  # makes the site installable as an app (name, icons, colours)
+├── sw.js                 # service worker: offline app shell + surah caching
+├── icons/                # app icons (any + maskable, Apple touch icon, favicon)
 ├── package.json          # one dependency (jose) for checking sign-in tokens
 ├── vercel.json           # gives the AI function up to 60 s
 ├── .env.example          # template for local testing (copy to .env, never commit .env)
@@ -27,6 +30,20 @@ al-quran/
 ```
 
 Each `data/N.json` is an array of verses: `[arabic, bangla, english, transliteration]`.
+
+## Install as an app (PWA)
+
+The site is a Progressive Web App: it installs from the browser and opens full-screen like a native app, with its own icon. No app store needed.
+
+- **Android (Chrome)**: tap **Install** in the site header (or ⋮ → *Install app*).
+- **iPhone / iPad (Safari)**: tap **Install** for steps, or Share → *Add to Home Screen*.
+- **Desktop (Chrome / Edge)**: **Install app** in the header, or the install icon in the address bar.
+
+Offline: the app shell and every surah you open are cached on the device. **Download for offline** (bottom of the home page) saves all 114 surahs (~5 MB). Highlights and notes made offline sync when you're back online. Explain / Ask and sign-in need internet. `/api/*` is never cached.
+
+When you change `index.html` or the icons, bump `VERSION` in `sw.js` so installed apps pick up the update.
+
+To publish on Google Play later: run the live URL through [PWABuilder](https://www.pwabuilder.com) to get an Android package (Trusted Web Activity).
 
 ## Accounts and privacy
 
