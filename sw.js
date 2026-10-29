@@ -5,7 +5,7 @@
 // - Fonts and the Firebase scripts are cached after first use.
 // - /api/* (Gemini, config) is never cached: AI answers and sign-in always go to the server.
 // Bump VERSION whenever index.html or the icons change, so phones pick up the update.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = `alq-shell-${VERSION}`;
 const DATA = 'alq-data-v1';      // surah text rarely changes; kept across app updates
 const ASSETS = 'alq-assets-v1';  // fonts, Firebase SDK
