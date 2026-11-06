@@ -1,8 +1,20 @@
-# Al Quran
+# My Quran
 
-A personal Quran reading website: Arabic (Uthmani) text with Bangla and English translations and transliteration for all 114 surahs, with highlights, notes, and AI explanations and Q&A.
+An installable Quran reader with Uthmani Arabic text, Bangla and English translations, and transliteration for all 114 surahs. Built with vanilla JavaScript, Firebase, and Vercel.
 
-Built with plain **HTML, CSS and vanilla JavaScript** (no framework). Quran data is stored as **JSON**.
+## Features
+
+- **Multilingual reading** with verse-by-verse Arabic, Bangla, English, and transliteration.
+- **Offline access** through a service worker that caches the reader and can download all 114 surahs.
+- **Personal study tools** with verse highlights, notes, and reading progress synced through Firebase.
+- **AI-assisted study** with verse explanations and Q&A streamed from Gemini through an authenticated serverless endpoint.
+
+| Layer | Technologies |
+| --- | --- |
+| Reader | HTML, CSS, vanilla JavaScript, JSON |
+| Offline and installation | Service Worker, Web App Manifest |
+| Identity and storage | Firebase Authentication, Cloud Firestore |
+| Serverless API | Vercel Functions, Gemini API, JOSE |
 
 ## Folder structure
 
@@ -42,8 +54,6 @@ The site is a Progressive Web App: it installs from the browser and opens full-s
 Offline: the app shell and every surah you open are cached on the device. **Download for offline** (bottom of the home page) saves all 114 surahs (~5 MB). Highlights and notes made offline sync when you're back online. Explain / Ask and sign-in need internet. `/api/*` is never cached.
 
 When you change `index.html` or the icons, bump `VERSION` in `sw.js` so installed apps pick up the update.
-
-To publish on Google Play later: run the live URL through [PWABuilder](https://www.pwabuilder.com) to get an Android package (Trusted Web Activity).
 
 ## Accounts and privacy
 
@@ -92,12 +102,12 @@ cp .env.example .env         # then fill in GEMINI_API_KEY and FIREBASE_CONFIG
 vercel dev                   # opens on http://localhost:3000
 ```
 
-## Deploy (Vercel, free)
+## Deploy on Vercel
 
 1. Go to vercel.com, sign in with GitHub, **Add New → Project**, import this repo.
 2. Framework preset: **Other**. Leave the build command empty.
 3. Under **Environment Variables** add `GEMINI_API_KEY` (your Gemini key) and `FIREBASE_CONFIG` (see Firebase setup).
-4. **Deploy.** Every push to `main` redeploys automatically.
+4. **Deploy.** Vercel can automatically deploy pushes to the configured production branch.
 
 To change the key later: Settings → Environment Variables, edit it, then **Redeploy**.
 
