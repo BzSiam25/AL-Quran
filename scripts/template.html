@@ -378,8 +378,9 @@ button{cursor:pointer}
 <div class="modal" id="ioshint" hidden role="dialog" aria-modal="true" aria-labelledby="ios-t">
   <div class="modal-card">
     <button class="x" id="iosclose" aria-label="Close">×</button>
-    <h3 id="ios-t">Install on iPhone / iPad</h3>
-    <p>১. Safari-র নিচের <b>Share</b> বাটন (বক্স থেকে উপরের দিকে তীর) চাপুন।<br>২. তালিকা থেকে <b>Add to Home Screen</b> বাছুন।<br>৩. উপরে ডানে <b>Add</b> চাপুন। হোম স্ক্রিনে Al Quran অ্যাপ চলে আসবে।</p>
+    <h3 id="ios-t">Install Al Quran</h3>
+    <p id="installsteps"></p>
+    <p>হোম স্ক্রিন থেকে অ্যাপটি খুলুন। অফলাইনে পড়তে হোম পেজের <b>Download for offline</b> দিয়ে সূরাগুলো সেভ করুন।</p>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -1026,15 +1027,53 @@ initAccount();
 let installEvt = null;
 const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (!isStandalone()) $('#install').hidden = false; });
-window.addEventListener('appinstalled', () => { installEvt = null; $('#install').hidden = true; toast('App installed'); });
-if (isIOS && !isStandalone()) $('#install').hidden = false;
+let appInstalled = false;
+const installMode = matchMedia('(display-mode: standalone)');
+const updateInstall = () => { $('#install').hidden = appInstalled || isStandalone(); };
+updateInstall();
+installMode.addEventListener('change', updateInstall);
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); installEvt = e; updateInstall();
+});
+window.addEventListener('appinstalled', () => {
+  appInstalled = true; installEvt = null; updateInstall();
+  closeInstallHelp(); toast('App installed');
+});
+function closeInstallHelp() {
+  if ($('#ioshint').hidden) return;
+  $('#ioshint').hidden = true;
+  $('#install').focus();
+}
+function showInstallHelp() {
+  const inApp = /FBAN|FBAV|Instagram|; wv\)/i.test(navigator.userAgent);
+  const android = /android/i.test(navigator.userAgent);
+  $('#installsteps').innerHTML = inApp
+    ? 'প্রথমে এই লিংকটি <b>Chrome (Android)</b> অথবা <b>Safari (iPhone)</b>-তে খুলুন। তারপর <b>Install app</b> চাপুন।'
+    : isIOS
+      ? '১. Safari-তে এই সাইট খুলুন।<br>২. <b>Share</b> মেনু থেকে <b>Add to Home Screen</b> বাছুন।<br>৩. <b>Open as Web App</b> অপশন থাকলে চালু রেখে <b>Add</b> চাপুন।'
+      : android
+        ? '১. Chrome-এ এই সাইট খুলুন।<br>২. মেনু <b>⋮</b> চাপুন।<br>৩. <b>Install app</b> অথবা <b>Add to Home screen → Install</b> বাছুন। ইনস্টল অপশন না এলে ইন্টারনেট চালু রেখে পেজটি আবার খুলুন।'
+        : 'Chrome বা Edge-এর address bar-এর <b>Install</b> আইকন অথবা browser menu-এর <b>Install Al Quran / Install this site as an app</b> বাছুন। আগে ইনস্টল করা থাকলে আপনার অ্যাপ তালিকা থেকে খুলুন।';
+  $('#ioshint').hidden = false;
+  $('#iosclose').focus();
+}
 $('#install').onclick = async () => {
-  if (installEvt) { installEvt.prompt(); const { outcome } = await installEvt.userChoice; installEvt = null; if (outcome === 'accepted') $('#install').hidden = true; }
-  else if (isIOS) $('#ioshint').hidden = false;
+  if (!installEvt) { showInstallHelp(); return; }
+  const prompt = installEvt;
+  installEvt = null;
+  $('#install').disabled = true;
+  try {
+    await prompt.prompt();
+    await prompt.userChoice;
+  } catch { showInstallHelp(); }
+  finally { $('#install').disabled = false; updateInstall(); }
 };
-$('#iosclose').onclick = () => { $('#ioshint').hidden = true; };
-$('#ioshint').addEventListener('click', e => { if (e.target.id === 'ioshint') $('#ioshint').hidden = true; });
+$('#iosclose').onclick = closeInstallHelp;
+$('#ioshint').addEventListener('click', e => { if (e.target.id === 'ioshint') closeInstallHelp(); });
+$('#ioshint').addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeInstallHelp();
+  if (e.key === 'Tab') { e.preventDefault(); $('#iosclose').focus(); }
+});
 
 async function offlineStatus(){
   if (!('caches' in window)) return 0;
@@ -1064,7 +1103,7 @@ $('#offbtn').onclick = () => {
 window.addEventListener('offline', () => toast('You are offline. Saved surahs and notes still work.'));
 window.addEventListener('online', () => toast('Back online'));
 
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+if ('serviceWorker' in navigator && (window.isSecureContext)) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready).then(() => {
       if (navigator.serviceWorker.controller) renderOffline();
